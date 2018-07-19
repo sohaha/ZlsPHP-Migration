@@ -1,0 +1,22 @@
+{
+  "name": "zls/migration",
+  "description": "",
+  "type": "library",
+  "license": "MIT",
+  "minimum-stability": "dev",
+  "authors": [
+    {
+      "name": "影浅",
+      "email": "seekwe@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Zls\\Migration\\": "src/"
+    }
+  },
+  "require": {
+    "php": ">=5.6.0",
+    "zls/phinx-package": "*"
+  }
+}
