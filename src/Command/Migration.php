@@ -75,6 +75,7 @@ class Migration extends Command
         $args = $this->clearArgs($args);
         $method = z::arrayGet($args, ['type', 2]);
         if ($method) {
+            $args = $this->argsCamel($method, $args);
             $argv = $this->args2Str($args);
             $methodChange = z::strSnake2Camel($method, false, ':');
             if (method_exists($this, $methodChange)) {
@@ -93,9 +94,6 @@ class Migration extends Command
             unset($args['-h']);
             $args['help'] = true;
         }
-        //if (z::arrayGet($args, ['-sql'])) {
-        //    unset($args['-sql']);
-        //}
 
         return $args;
     }
@@ -113,6 +111,17 @@ class Migration extends Command
         }
 
         return join(' ', $argv);
+    }
+
+    private function argsCamel($method, $args)
+    {
+        $isCamels = ['create', 'c', 'seed:create', 's:c','seed:c'];
+        if (in_array($method, $isCamels)) {
+            $name = z::strSnake2Camel(z::arrayGet($args, 3), true);
+            $args[3] = $name;
+        }
+
+        return $args;
     }
 
     /**
@@ -146,39 +155,6 @@ class Migration extends Command
     private function cmdResult($str)
     {
         return $str;
-    }
-
-    /**
-     * 创建表迁移
-     * @param $args
-     * @param $argv
-     */
-    public function create($args, $argv)
-    {
-
-        $name = z::strSnake2Camel(z::arrayGet($args, 3), true);
-        $args[3] = $name;
-        if (!z::arrayGet($args, ['-template']) && !z::arrayGet($args, ['-class'])) {
-            $args['-template'] = __DIR__ . '/../template/Migration.template.php.dist';
-        }
-        $argv = $this->args2Str($args);
-        $this->runPhinx('create', $args, $argv);
-    }
-
-    /**
-     * 创建数据填充
-     * @param $args
-     * @param $argv
-     */
-    public function seedCreate($args, $argv)
-    {
-        $name = z::strSnake2Camel(z::arrayGet($args, 3), true);
-        $args[3] = $name;
-        if (!z::arrayGet($args, ['-template']) && !z::arrayGet($args, ['-class'])) {
-            $args['-template'] = __DIR__ . '/../template/Seed.template.php.dist';
-        }
-        $argv = $this->args2Str($args);
-        $this->runPhinx('seed:create', $args, $argv);
     }
 
     public function init($args)
