@@ -18,24 +18,16 @@ class Migration extends Command
 {
     private $vendorPath;
     private $configFilePath;
-    private $defaultConfigPath;
     private $phinxPath;
 
     public function __construct()
     {
         parent::__construct();
         $this->vendorPath = z::realPath('vendor', true, false);
-        $this->defaultConfigPath = __DIR__ . '/../phinx.php';
-        $this->configFilePath = $this->getConfigFilePath();
-        $this->phinxPath = $this->vendorPath . 'robmorgan/phinx/bin/phinx';
+        $this->configFilePath = __DIR__ . '/../phinx.php';
+        $this->phinxPath = $this->vendorPath . 'zls/phinx-package/bin/phinx';
     }
 
-    private function getConfigFilePath()
-    {
-        $projectPhinxPath = z::realPath('phinx.php', false, false);
-
-        return is_file($projectPhinxPath) ? $projectPhinxPath : $this->defaultConfigPath;
-    }
 
     /**
      * 命令配置
@@ -80,17 +72,32 @@ class Migration extends Command
      */
     public function execute($args)
     {
+        $args = $this->clearArgs($args);
         $method = z::arrayGet($args, ['type', 2]);
         if ($method) {
             $argv = $this->args2Str($args);
-            if (method_exists($this, $method)) {
-                $this->$method($args, $argv);
+            $methodChange = z::strSnake2Camel($method, false, ':');
+            if (method_exists($this, $methodChange)) {
+                $this->$methodChange($args, $argv);
             } else {
                 $this->runPhinx($method, $args, $argv);
             }
         } else {
             $this->help($args);
         }
+    }
+
+    private function clearArgs($args)
+    {
+        if (z::arrayGet($args, ['-h'])) {
+            unset($args['-h']);
+            $args['help'] = true;
+        }
+        //if (z::arrayGet($args, ['-sql'])) {
+        //    unset($args['-sql']);
+        //}
+
+        return $args;
     }
 
     private function args2Str($args)
@@ -108,25 +115,32 @@ class Migration extends Command
         return join(' ', $argv);
     }
 
+    /**
+     * 执行phinx命令
+     * @param $method
+     * @param $args
+     * @param $argv
+     */
     private function runPhinx($method, $args, $argv)
     {
-        $camelCase = ['create', 'seed:create'];
-        if (in_array($method, $camelCase)) {
-            $name = z::strSnake2Camel(z::arrayGet($args, 3), true);
-            $args[3] = $name;
-            $argv = $this->args2Str($args);
-        }
-        $phinxCmd = ['rollback', 'migrate', 'status', 'create'];
         $phinxEnvironment = ['rollback', 'migrate', 'status', 'breakpoint'];
-        if (in_array($method, $phinxCmd)) {
+        $ignoreConfiguration = [
+            'list',
+            'l',
+        ];
+        if (!in_array($method, $ignoreConfiguration)) {
             $argv .= ' --configuration ' . $this->configFilePath;
         }
         if (in_array($method, $phinxEnvironment)) {
             $argv .= ' -e production';
         }
-        $cmd = " {$this->phinxPath} {$method} {$argv}";
-        $result = z::command(z::phpPath() . $cmd);
-        $this->printStrN($this->cmdResult($result));
+        $cmd = z::phpPath() . " {$this->phinxPath} {$method} {$argv}";
+        if (z::arrayGet($args, '-debug')) {
+            $this->printStrN($cmd);
+        } else {
+            $result = z::command($cmd);
+            $this->printStrN($this->cmdResult($result));
+        }
     }
 
     private function cmdResult($str)
@@ -134,25 +148,50 @@ class Migration extends Command
         return $str;
     }
 
-    public function init()
+    /**
+     * 创建表迁移
+     * @param $args
+     * @param $argv
+     */
+    public function create($args, $argv)
     {
-        $projectPhinxPath = z::realPath('phinx.php', false, false);
-        $isExists = false;
-        if (is_file($projectPhinxPath)) {
-            $isExists = true;
-            $this->error('Config file phinx.php already exists.');
-            //$this->printStrN();
-            //$result = $this->ask('Whether to overwrite the current configuration [y|N]:', 'n');
-            //$isExists = !($result === 'y');
+
+        $name = z::strSnake2Camel(z::arrayGet($args, 3), true);
+        $args[3] = $name;
+        if (!z::arrayGet($args, ['-template']) && !z::arrayGet($args, ['-class'])) {
+            $args['-template'] = __DIR__ . '/../template/Migration.template.php.dist';
         }
-        if (!$isExists) {
-            $content = file_get_contents($this->defaultConfigPath);
-            $content = str_replace('/../../../../application/', '/./application/', $content);
-            if (@file_put_contents($projectPhinxPath, $content)) {
-                $this->success('Created Config file phinx.php');
+        $argv = $this->args2Str($args);
+        $this->runPhinx('create', $args, $argv);
+    }
+
+    /**
+     * 创建数据填充
+     * @param $args
+     * @param $argv
+     */
+    public function seedCreate($args, $argv)
+    {
+        $name = z::strSnake2Camel(z::arrayGet($args, 3), true);
+        $args[3] = $name;
+        if (!z::arrayGet($args, ['-template']) && !z::arrayGet($args, ['-class'])) {
+            $args['-template'] = __DIR__ . '/../template/Seed.template.php.dist';
+        }
+        $argv = $this->args2Str($args);
+        $this->runPhinx('seed:create', $args, $argv);
+    }
+
+    public function init($args)
+    {
+        $force = Z::arrayGet($args, ['-force', 'F']);
+        $path = z::realPath(__DIR__ . '/../migration.ini', false, false);
+        $this->copyFile($path, $this->vendorPath . '../migration.ini', $force, function ($state) {
+            if (!$state) {
+                $this->error('migration.ini already exists');
+                $this->printStrN('you can use -force to force the config file');
             } else {
-                $this->error('Created Error');
+                $this->success('Created Config file migration.ini');
             }
-        }
+        }, '');
     }
 }
