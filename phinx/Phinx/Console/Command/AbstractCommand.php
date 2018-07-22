@@ -15,8 +15,6 @@ use Zls\Migration\Argv as InputInterface;
 //use Symfony\Component\Console\Input\InputInterface;
 //use Symfony\Component\Console\Input\InputOption;
 //use Symfony\Component\Console\Output\OutputInterface;
-
-
 class AbstractCommand extends Command
 {
     /**
@@ -89,13 +87,13 @@ class AbstractCommand extends Command
         $paths = $this->getConfig()->getMigrationPaths();
         $output->writeln($output->infoText('using migration paths'));
         foreach (Util::globAll($paths) as $path) {
-            $output->writeln($output->infoText(' - ' . realpath($path)));
+            $output->writeln(' - ' . realpath($path), '');
         }
         try {
             $paths = $this->getConfig()->getSeedPaths();
             $output->writeln($output->infoText('using seed paths '));
             foreach (Util::globAll($paths) as $path) {
-                $output->writeln($output->infoText(' - ' . realpath($path)));
+                $output->writeln(' - ' . realpath($path), '');
             }
         } catch (\UnexpectedValueException $e) {
             // do nothing as seeds are optional
@@ -195,6 +193,21 @@ class AbstractCommand extends Command
         return $this;
     }
 
+    public function options()
+    {
+
+    }
+
+    public function description()
+    {
+
+    }
+
+    public function execute($args)
+    {
+
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -264,23 +277,5 @@ class AbstractCommand extends Command
     protected function getSeedTemplateFilename()
     {
         return __DIR__ . self::DEFAULT_SEED_TEMPLATE;
-    }
-
-
-    public function options()
-    {
-
-    }
-
-
-    public function description()
-    {
-
-    }
-
-
-    public function execute($args)
-    {
-
     }
 }

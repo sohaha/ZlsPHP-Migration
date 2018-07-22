@@ -10,7 +10,6 @@ use Phinx\Migration\Manager\Environment;
 use Phinx\Seed\AbstractSeed;
 use Phinx\Seed\SeedInterface;
 use Phinx\Util\Util;
-
 use Zls\Migration\Argv as InputInterface;
 
 class Manager
@@ -51,7 +50,7 @@ class Manager
     /**
      * Class Constructor.
      * @param \Phinx\Config\ConfigInterface $config Configuration Object
-     * @param InputInterface                   $input  Console Input
+     * @param InputInterface                $input  Console Input
      * @param OutputInterface               $output Console Output
      */
     public function __construct(ConfigInterface $config, InputInterface $input, OutputInterface $output)
@@ -82,16 +81,16 @@ class Manager
             $output->writeln('');
             switch ($this->getConfig()->getVersionOrder()) {
                 case Config::VERSION_ORDER_CREATION_TIME:
-                    $migrationIdAndStartedHeader = $this->getOutput()->infoText("[Migration ID]") . "  Started            ";
+                    $migrationIdAndStartedHeader = $this->getOutput()->infoText("[Migration ID]") . "  Started                ";
                     break;
                 case Config::VERSION_ORDER_EXECUTION_TIME:
-                    $migrationIdAndStartedHeader = "Migration ID    " . $this->getOutput()->infoText("[Started          ]");
+                    $migrationIdAndStartedHeader = "Migration ID    " . $this->getOutput()->infoText("[Started              ]");
                     break;
                 default:
                     throw new \RuntimeException('Invalid version_order configuration option');
             }
-            $output->writeln(" Status  $migrationIdAndStartedHeader  Finished             Migration Name ");
-            $output->writeln('----------------------------------------------------------------------------------');
+            $output->writeln(" Status  $migrationIdAndStartedHeader  Finished                 Migration Name ");
+            $output->writeln('------------------------------------------------------------------------------------------');
             $env = $this->getEnvironment($environment);
             $versions = $env->getVersionLog();
             $maxNameLength = $versions ? max(array_map(function ($version) {
@@ -150,7 +149,7 @@ class Manager
                 }
                 $maxNameLength = max($maxNameLength, strlen($migration->getName()));
                 $output->writeln(sprintf(
-                    '%s %14.0f  %19s  %19s  ' . $this->getOutput()->tipText('%s'),
+                    '%s %14.0f  %23s  %23s  ' . $this->getOutput()->tipText('%s'),
                     $status,
                     $migration->getVersion(),
                     $version['start_time'],
@@ -158,7 +157,7 @@ class Manager
                     $migration->getName()
                 ));
                 if ($version && $version['breakpoint']) {
-                    $output->writeln('         <error>BREAKPOINT SET</error>');
+                    $output->writeln($output->errorText('         BREAKPOINT SET'));
                 }
                 $migrations[] = ['migration_status' => trim(strip_tags($status)), 'migration_id' => sprintf('%14.0f', $migration->getVersion()), 'migration_name' => $migration->getName()];
                 unset($versions[$migration->getVersion()]);
@@ -441,14 +440,14 @@ class Manager
     private function printMissingVersion($version, $maxNameLength)
     {
         $this->getOutput()->writeln(sprintf(
-            '     <error>up</error>  %14.0f  %19s  %19s  <comment>%s</comment>  <error>** MISSING **</error>',
+            $this->getOutput()->errorText('     up') . '  %14.0f  %19s  %19s  ' . $this->getOutput()->warningText('%s') . $this->getOutput()->errorText('** MISSING **'),
             $version['version'],
             $version['start_time'],
             $version['end_time'],
             str_pad($version['migration_name'], $maxNameLength, ' ')
         ));
         if ($version && $version['breakpoint']) {
-            $this->getOutput()->writeln('         <error>BREAKPOINT SET</error>');
+            $this->getOutput()->writeln($this->getOutput()->errorText('         BREAKPOINT SET'));
         }
     }
 
@@ -495,7 +494,7 @@ class Manager
         } else {
             if (0 != $version && !isset($migrations[$version])) {
                 $this->output->writeln(sprintf(
-                    '<comment>warning</comment> %s is not a valid version',
+                    $this->output->warningText('warning') . ' %s is not a valid version',
                     $version
                 ));
 
@@ -540,9 +539,9 @@ class Manager
         $this->getOutput()->writeln('');
         $this->getOutput()->writeln(
             ' ==' .
-            ' ' . $migration->getVersion() . ' ' . $migration->getName() . ':' .
-            ' ' . $this->getOutput()->color($direction === MigrationInterface::UP ? 'migrating' : 'reverting')
-        );
+            ' ' . $migration->getVersion() . ' ' . $this->getOutput()->colorText($migration->getName(), 'green') . ':' .
+            ' ' . ($direction === MigrationInterface::UP ? 'migrating' : 'reverting')
+            , 'white');
         $migration->preFlightCheck($direction);
         // Execute the migration and log the time elapsed.
         $start = microtime(true);
@@ -550,10 +549,10 @@ class Manager
         $end = microtime(true);
         $this->getOutput()->writeln(
             ' ==' .
-            ' ' . $this->getOutput()->infoText($migration->getVersion() . ' ' . $migration->getName() . ':') .
-            ' ' . $this->getOutput()->tipText(($direction === MigrationInterface::UP ? 'migrated' : 'reverted') .
-                ' ' . sprintf('%.4fs', $end - $start))
-        );
+            ' ' . $migration->getVersion() . ' ' . $this->getOutput()->colorText($migration->getName(), 'green') . ':' .
+            ' ' . ($direction === MigrationInterface::UP ? 'migrated' : 'reverted') .
+            ' ' . sprintf('%.4fs', $end - $start)
+            , 'light_gray');
     }
 
     /**
