@@ -2,6 +2,7 @@
 
 namespace Zls\Migration\Command;
 
+use Phinx\Console\PhinxApplication;
 use Z;
 use Zls\Command\Command;
 
@@ -40,15 +41,71 @@ class Migration extends Command
 
     public function example()
     {
+        return [];
+    }
+
+    /**
+     * @param      $args
+     * @param null $command
+     */
+    public function help($args, $command = null)
+    {
+        $this->execute($args);
+    }
+
+    /**
+     * 命令默认执行
+     * @param $args
+     */
+    public function execute($args)
+    {
+        if (z::arrayGet($args, 2)) {
+            $this->ex($args);
+            $phinx = new PhinxApplication();
+            $phinx->run();
+        } else {
+            parent::help($args);
+        }
+        //$method = z::arrayGet($args, ['hh']);
+        //if ($method) {
+        //    $args = $this->argsCamel($method, $args);
+        //    $argv = $this->args2Str($args);
+        //    $methodChange = z::strSnake2Camel($method, false, ':');
+        //    if (method_exists($this, $methodChange)) {
+        //        $this->$methodChange($args, $argv);
+        //    } else {
+        //        $this->runPhinx($method, $args, $argv);
+        //    }
+        //} else {
+        //    $this->help($args);
+        //}
+    }
+
+    protected function ex($argv)
+    {
+        $name = z::arrayGet($argv, 1, '');
+        if (strpos($name, ':') !== false) {
+            list($a1, $a2) = explode(':', $name);
+            $argv[1] = $a1;
+            array_splice($argv, 2, 0, $a2);
+            $ArgvObj = z::factory('Zls\Migration\Argv', true);
+            $ArgvObj->set($argv);
+        }
+
+        return $argv;
+    }
+
+    public function handle()
+    {
         return [
-            ' init'        => 'Initialize Phinx Config',
-            ' create'      => 'Create a new migration',
-            ' migrate'     => 'Migrate the database',
-            ' rollback'    => 'Rollback the last or to a specific migration',
-            ' breakpoint'  => 'Manage breakpoints',
-            ' status'      => 'Show migration status',
-            ' seed:create' => 'Create a new database seeder',
-            ' seed:run'    => 'Run database seeders',
+            'init'        => 'Initialize Phinx Config',
+            'create'      => 'Create a new migration',
+            'migrate'     => 'Migrate the database',
+            'rollback'    => 'Rollback the last or to a specific migration',
+            'breakpoint'  => 'Manage breakpoints',
+            'status'      => 'Show migration status',
+            'seed:create' => 'Create a new database seeder',
+            'seed:run'    => 'Run database seeders',
         ];
     }
 
@@ -61,31 +118,24 @@ class Migration extends Command
         return 'Easy to manage the database migrations';
     }
 
-    public function handle()
+    public function __call($method, $args)
     {
-        return [];
+        $argv = $this->ex(z::arrayGet($args, 0, []));
+        $this->execute($argv);
     }
 
-    /**
-     * 命令默认执行
-     * @param $args
-     */
-    public function execute($args)
+    public function init($args)
     {
-        $args = $this->clearArgs($args);
-        $method = z::arrayGet($args, ['type', 2]);
-        if ($method) {
-            $args = $this->argsCamel($method, $args);
-            $argv = $this->args2Str($args);
-            $methodChange = z::strSnake2Camel($method, false, ':');
-            if (method_exists($this, $methodChange)) {
-                $this->$methodChange($args, $argv);
+        $force = Z::arrayGet($args, ['-force', 'F']);
+        $path = z::realPath(__DIR__ . '/../migration.ini', false, false);
+        $this->copyFile($path, $this->vendorPath . '../migration.ini', $force, function ($state) {
+            if (!$state) {
+                $this->error('migration.ini already exists');
+                $this->printStrN('you can use -force to force the config file');
             } else {
-                $this->runPhinx($method, $args, $argv);
+                $this->success('Created Config file migration.ini');
             }
-        } else {
-            $this->help($args);
-        }
+        }, '');
     }
 
     private function clearArgs($args)
@@ -115,7 +165,7 @@ class Migration extends Command
 
     private function argsCamel($method, $args)
     {
-        $isCamels = ['create', 'c', 'seed:create', 's:c','seed:c'];
+        $isCamels = ['create', 'c', 'seed:create', 's:c', 'seed:c'];
         if (in_array($method, $isCamels)) {
             $name = z::strSnake2Camel(z::arrayGet($args, 3), true);
             $args[3] = $name;
@@ -124,23 +174,26 @@ class Migration extends Command
         return $args;
     }
 
-    /**
-     * 执行phinx命令
-     * @param $method
-     * @param $args
-     * @param $argv
-     */
     private function runPhinx($method, $args, $argv)
     {
-        $phinxEnvironment = ['rollback', 'migrate', 'status', 'breakpoint'];
+        $phinxEnvironment = ['rollback', 'migrate', 'status', 'breakpoint', 'm', 'r'];
         $ignoreConfiguration = [
             'list',
             'l',
         ];
+        $ignoreEnvironment = [
+            'list',
+            'l',
+            'create',
+            'c',
+            'seed:create',
+            'seed:c',
+            's:c',
+        ];
         if (!in_array($method, $ignoreConfiguration)) {
             $argv .= ' --configuration ' . $this->configFilePath;
         }
-        if (in_array($method, $phinxEnvironment)) {
+        if (!in_array($method, $ignoreEnvironment)) {
             $argv .= ' -e production';
         }
         $cmd = z::phpPath() . " {$this->phinxPath} {$method} {$argv}";
@@ -155,19 +208,5 @@ class Migration extends Command
     private function cmdResult($str)
     {
         return $str;
-    }
-
-    public function init($args)
-    {
-        $force = Z::arrayGet($args, ['-force', 'F']);
-        $path = z::realPath(__DIR__ . '/../migration.ini', false, false);
-        $this->copyFile($path, $this->vendorPath . '../migration.ini', $force, function ($state) {
-            if (!$state) {
-                $this->error('migration.ini already exists');
-                $this->printStrN('you can use -force to force the config file');
-            } else {
-                $this->success('Created Config file migration.ini');
-            }
-        }, '');
     }
 }
