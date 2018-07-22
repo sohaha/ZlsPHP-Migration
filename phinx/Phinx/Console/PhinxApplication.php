@@ -49,7 +49,11 @@ class PhinxApplication
         } catch (\Exception $e) {
             $this->printStrN();
             $err = $e->getMessage();
-            $err = str_replace('Cannot reverse a "Phinx\Db\Action\RemoveColumn" command', 'Please check the script content is qualified.', $err);
+            if (z::strEndsWith($err, 'not found')) {
+                $err = "migration command '{$method}' not found";
+            } else {
+                $err = str_replace('Cannot reverse a "Phinx\Db\Action\RemoveColumn" command', 'Please check the script content is qualified.', $err);
+            }
             $this->error($err);
         }
 

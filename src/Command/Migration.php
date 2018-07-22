@@ -88,14 +88,14 @@ class Migration extends Command
     public function handle()
     {
         return [
-            'init'        => 'Initialize Phinx Config',
-            'create'      => 'Create a new migration',
-            'migrate'     => 'Migrate the database',
-            'rollback'    => 'Rollback the last or to a specific migration',
-            'breakpoint'  => 'Manage breakpoints',
-            'status'      => 'Show migration status',
-            'seed:create' => 'Create a new database seeder',
-            'seed:run'    => 'Run database seeders',
+            ' init'        => 'Initialize Phinx Config',
+            ' create'      => 'Create a new migration',
+            ' migrate'     => 'Migrate the database',
+            ' rollback'    => 'Rollback the last or to a specific migration',
+            ' breakpoint'  => 'Manage breakpoints',
+            ' status'      => 'Show migration status',
+            ' seed:create' => 'Create a new database seeder',
+            ' seed:run'    => 'Run database seeders',
         ];
     }
 
