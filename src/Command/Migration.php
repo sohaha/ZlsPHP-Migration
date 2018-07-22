@@ -19,14 +19,12 @@ class Migration extends Command
 {
     private $vendorPath;
     private $configFilePath;
-    private $phinxPath;
 
     public function __construct()
     {
         parent::__construct();
-        $this->vendorPath = z::realPath('vendor', true, false);
+        $this->vendorPath = getcwd() . '/vendor/';
         $this->configFilePath = __DIR__ . '/../phinx.php';
-        $this->phinxPath = $this->vendorPath . 'zls/phinx-package/bin/phinx';
     }
 
 
@@ -59,26 +57,18 @@ class Migration extends Command
      */
     public function execute($args)
     {
-        if (z::arrayGet($args, 2)) {
-            $this->ex($args);
-            $phinx = new PhinxApplication();
-            $phinx->run();
+        $method = z::arrayGet($args, 2);
+        if ($method) {
+            if (method_exists($this, $method)) {
+                $this->$method($args);
+            } else {
+                $this->ex($args);
+                $phinx = new PhinxApplication();
+                $phinx->run();
+            }
         } else {
             parent::help($args);
         }
-        //$method = z::arrayGet($args, ['hh']);
-        //if ($method) {
-        //    $args = $this->argsCamel($method, $args);
-        //    $argv = $this->args2Str($args);
-        //    $methodChange = z::strSnake2Camel($method, false, ':');
-        //    if (method_exists($this, $methodChange)) {
-        //        $this->$methodChange($args, $argv);
-        //    } else {
-        //        $this->runPhinx($method, $args, $argv);
-        //    }
-        //} else {
-        //    $this->help($args);
-        //}
     }
 
     protected function ex($argv)
@@ -131,7 +121,7 @@ class Migration extends Command
         $this->copyFile($path, $this->vendorPath . '../migration.ini', $force, function ($state) {
             if (!$state) {
                 $this->error('migration.ini already exists');
-                $this->printStrN('you can use -force to force the config file');
+                $this->printStrN('you can use --force to force the config file');
             } else {
                 $this->success('Created Config file migration.ini');
             }

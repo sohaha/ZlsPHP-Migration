@@ -1,6 +1,6 @@
 {
   "name": "zls/migration",
-  "description": "",
+  "description": "Easy to manage the database migrations",
   "type": "library",
   "license": "MIT",
   "minimum-stability": "dev",
@@ -12,11 +12,11 @@
   ],
   "autoload": {
     "psr-4": {
-      "Zls\\Migration\\": "src/"
+      "Zls\\Migration\\": "src/",
+      "Phinx\\": "Phinx/"
     }
   },
   "require": {
-    "php": ">=5.6.0",
-    "zls/phinx-package": "*"
+    "php": ">=5.6.0"
   }
 }
