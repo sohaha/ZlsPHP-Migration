@@ -55,13 +55,14 @@ class AbstractCommand extends Command
         self::$date = $input->get(['-date', 'date']);
         self::$fake = (bool)$input->get(['-fake']);
         self::$force = (bool)$input->get(['-force']);
-        self::$name = '';
-        foreach ($input->get() as $k => $v) {
-            if (!is_numeric($k) || $k <= 2) {
-                continue;
+        if (!self::$name = $input->get(['-name'])) {
+            foreach ($input->get() as $k => $v) {
+                if (!is_numeric($k) || $k <= 2) {
+                    continue;
+                }
+                self::$name = $v;
+                break;
             }
-            self::$name = $v;
-            break;
         }
         $cwd = getcwd();
         self::$configuration = $input->get(['-configuration'], $cwd . self::CONFIGURATION_PATH);

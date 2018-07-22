@@ -29,6 +29,9 @@ class PhinxApplication
             case 'r':
                 $class = 'rollback';
                 break;
+            case 'b':
+                $class = 'breakpoint';
+                break;
             case 'seed:c':
             case 's:c':
             case 's:create':
