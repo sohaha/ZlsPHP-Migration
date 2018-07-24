@@ -275,6 +275,7 @@ class SqlServerAdapter extends PdoAdapter implements AdapterInterface
             case static::PHINX_TYPE_DATETIME:
             case static::PHINX_TYPE_TIME:
             case static::PHINX_TYPE_DATE:
+            case static::PHINX_TYPE_TIMESTAMP:
                 return ['name' => $type];
             case static::PHINX_TYPE_STRING:
                 return ['name' => 'nvarchar', 'limit' => 255];
@@ -286,8 +287,6 @@ class SqlServerAdapter extends PdoAdapter implements AdapterInterface
                 return ['name' => 'int'];
             case static::PHINX_TYPE_BIG_INTEGER:
                 return ['name' => 'bigint'];
-            case static::PHINX_TYPE_TIMESTAMP:
-                return ['name' => 'datetime'];
             case static::PHINX_TYPE_BLOB:
             case static::PHINX_TYPE_BINARY:
                 return ['name' => 'varbinary'];
