@@ -17,15 +17,15 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
 {
 
     const TEXT_TINY = 255;
-const TEXT_SMALL = 255;
-        const TEXT_REGULAR = 65535; /* deprecated, alias of TEXT_TINY */
+    const TEXT_SMALL = 255;
+    const TEXT_REGULAR = 65535; /* deprecated, alias of TEXT_TINY */
     const TEXT_MEDIUM = 16777215;
     const TEXT_LONG = 4294967295;
     const BLOB_TINY = 255;
 
     // According to https://dev.mysql.com/doc/refman/5.0/en/blob.html BLOB sizes are the same as TEXT
-const BLOB_SMALL = 255;
-        const BLOB_REGULAR = 65535; /* deprecated, alias of BLOB_TINY */
+    const BLOB_SMALL = 255;
+    const BLOB_REGULAR = 65535; /* deprecated, alias of BLOB_TINY */
     const BLOB_MEDIUM = 16777215;
     const BLOB_LONG = 4294967295;
     const INT_TINY = 255;

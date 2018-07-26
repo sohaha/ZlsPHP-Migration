@@ -54,6 +54,8 @@ class PhinxApplication
             $err = $e->getMessage();
             if (z::strEndsWith($err, 'not found')) {
                 $err = "migration command '{$method}' not found";
+            } elseif (strpos($err, 'Phinx\Db\Action\DropTable')) {
+                $err = 'Unable to execute, please check if the script is normal';
             } else {
                 $err = str_replace('Cannot reverse a "Phinx\Db\Action\RemoveColumn" command', 'Please check the script content is qualified.', $err);
             }

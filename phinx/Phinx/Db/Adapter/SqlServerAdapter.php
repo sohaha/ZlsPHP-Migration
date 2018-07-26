@@ -8,6 +8,7 @@ use Phinx\Db\Table\Index;
 use Phinx\Db\Table\Table;
 use Phinx\Db\Util\AlterInstructions;
 use Phinx\Util\Literal;
+use Z;
 
 /**
  * Phinx SqlServer Adapter.
