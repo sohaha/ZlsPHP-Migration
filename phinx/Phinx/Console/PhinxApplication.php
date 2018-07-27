@@ -16,6 +16,7 @@ class PhinxApplication
 
     public function run()
     {
+
         $argv = z::factory('Zls\Migration\Argv', true);
         $args = $argv->get();
         $class = z::arrayGet($args, [2]);

@@ -3,6 +3,7 @@
 namespace Phinx\Db\Adapter;
 
 use BadMethodCallException;
+use Phinx\Console\Command\OutputInterface;
 use Phinx\Db\Action\AddColumn;
 use Phinx\Db\Action\AddForeignKey;
 use Phinx\Db\Action\AddIndex;
@@ -19,8 +20,6 @@ use Phinx\Db\Table\Index;
 use Phinx\Db\Table\Table;
 use Phinx\Db\Util\AlterInstructions;
 use Phinx\Migration\MigrationInterface;
-use Phinx\Console\Command\OutputInterface;
-use Z;
 
 /**
  * Phinx PDO Adapter.
@@ -297,12 +296,19 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      */
     public function execute($sql, $showSql = true)
     {
+        static $i = false;
         $this->verboseLog($sql);
         if ($this->isDryRunEnabled()) {
             return 0;
         }
-        if ($showSql && z::getOpt('-sql')) {
-            echo $sql . PHP_EOL;
+        $sqlPath = AlterInstructions::exportSqlFile();
+        if ($showSql && $sqlPath) {
+            $data = $sql . PHP_EOL;
+            if ($sqlPath !== true) {
+                file_put_contents($sqlPath, $data, $i ? LOCK_EX | FILE_APPEND : 0);
+                $i = true;
+            }
+            echo $data;
         }
 
         return $this->getConnection()->exec($sql);

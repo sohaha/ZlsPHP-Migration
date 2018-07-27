@@ -2,6 +2,8 @@
 
 namespace Phinx\Db\Util;
 
+use Z;
+
 /**
  * Contains all the information for running an ALTER command for a table,
  * and any post-steps required after the fact.
@@ -28,6 +30,24 @@ class AlterInstructions
     {
         $this->alterParts = $alterParts;
         $this->postSteps = $postSteps;
+    }
+
+    public static function exportSqlFile()
+    {
+        $input = new \Zls_CliArgs();
+        $sqlSavePath = $input->get(['-sql', 'sql']);
+        if ($sqlSavePath && $sqlSavePath !== true) {
+            $path = explode('/', $sqlSavePath);
+            array_pop($path);
+            $path = implode('/', $path) ?: './';
+            $sqlSavePath = z::realPath($sqlSavePath, false, false);
+            $path = z::realPath($path, false, false);
+            if (!(is_dir($path) && !is_dir($sqlSavePath))) {
+                $sqlSavePath = true;
+            }
+        }
+
+        return $sqlSavePath;
     }
 
     /**
