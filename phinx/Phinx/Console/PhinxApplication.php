@@ -36,6 +36,7 @@ class PhinxApplication
             case 'seed:c':
             case 's:c':
             case 's:create':
+            case 'seed:create':
                 $class = 'seed_create';
                 break;
             default:
