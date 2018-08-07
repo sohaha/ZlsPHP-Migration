@@ -12,6 +12,7 @@ use Phinx\Db\Action\DropTable;
 use Phinx\Db\Action\RemoveColumn;
 use Phinx\Db\Action\RenameColumn;
 use Phinx\Db\Action\RenameTable;
+use Phinx\Db\Action\UpdateTable;
 use Phinx\Db\Plan\Intent;
 use Phinx\Db\Plan\Plan;
 use Phinx\Db\Table\Table;
@@ -88,6 +89,9 @@ class ProxyAdapter extends AdapterWrapper
                     $name = $column->getName();
                     $column->setName($com->getNewName());
                     $inverted->addAction(new RenameColumn($com->getTable(), $column, $name));
+                    break;
+                case ($com instanceof UpdateTable):
+                    //更新表
                     break;
                 case $com instanceof AddIndex:
                     $inverted->addAction(new DropIndex($com->getTable(), $com->getIndex()));
