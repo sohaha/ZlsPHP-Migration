@@ -1030,7 +1030,8 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
                 $instructions->merge($this->getDropForeignKeyInstructions($tableName, $row['CONSTRAINT_NAME']));
             }
         }
-        if (empty($instructions->getAlterParts())) {
+        $AlterParts = $instructions->getAlterParts();
+        if (empty($AlterParts)) {
             throw new \InvalidArgumentException(sprintf(
                 "Not foreign key on columns '%s' exist",
                 implode(',', $columns)
@@ -1040,9 +1041,6 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
         return $instructions;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function getDropForeignKeyInstructions($tableName, $constraint)
     {
         $alter = sprintf(
@@ -1051,5 +1049,13 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
         );
 
         return new AlterInstructions([$alter]);
+    }
+
+    protected function getUpdateTableInstructions($tableName, $comment)
+    {
+        /** @noinspection SqlNoDataSourceInspection */
+        $sql = "alter table {$tableName} comment '{$comment}'";
+
+        return new AlterInstructions([], [$sql]);
     }
 }

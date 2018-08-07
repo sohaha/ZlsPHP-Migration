@@ -7,6 +7,7 @@ use Phinx\Db\Adapter\AdapterFactory;
 use Phinx\Db\Adapter\AdapterInterface;
 use Phinx\Migration\MigrationInterface;
 use Phinx\Seed\SeedInterface;
+use Z;
 use Zls\Migration\Argv as InputInterface;
 
 class Environment
@@ -287,7 +288,6 @@ class Environment
                 unset($options['dsn']);
             }
         }
-
         return $options;
     }
 

@@ -1184,4 +1184,9 @@ class PostgresAdapter extends PdoAdapter implements AdapterInterface
 
         return new AlterInstructions([$alter]);
     }
+
+    protected function getUpdateTableInstructions($tableName, $options)
+    {
+        // TODO: Implement getUpdateTableInstructions() method.
+    }
 }

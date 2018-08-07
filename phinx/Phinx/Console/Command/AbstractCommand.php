@@ -118,7 +118,6 @@ class AbstractCommand extends Command
     public function setConfig(ConfigInterface $config)
     {
         $this->config = $config;
-
         return $this;
     }
 

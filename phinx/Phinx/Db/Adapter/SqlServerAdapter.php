@@ -8,7 +8,6 @@ use Phinx\Db\Table\Index;
 use Phinx\Db\Table\Table;
 use Phinx\Db\Util\AlterInstructions;
 use Phinx\Util\Literal;
-use Z;
 
 /**
  * Phinx SqlServer Adapter.
@@ -297,13 +296,10 @@ class SqlServerAdapter extends PdoAdapter implements AdapterInterface
                 return ['name' => 'uniqueidentifier'];
             case static::PHINX_TYPE_FILESTREAM:
                 return ['name' => 'varbinary', 'limit' => 'max'];
-            // Geospatial database types
             case static::PHINX_TYPE_GEOMETRY:
             case static::PHINX_TYPE_POINT:
             case static::PHINX_TYPE_LINESTRING:
             case static::PHINX_TYPE_POLYGON:
-                // SQL Server stores all spatial data using a single data type.
-                // Specific types (point, polygon, etc) are set at insert time.
                 return ['name' => 'geography'];
             default:
                 throw new \RuntimeException('The type: "' . $type . '" is not supported.');
@@ -1050,5 +1046,23 @@ WHERE
         }
 
         return $instructions;
+    }
+
+    protected function getUpdateTableInstructions($tableName, $comment)
+    {
+        $sql = "IF ((SELECT COUNT(*) FROM ::fn_listextendedproperty('MS_Description',
+'SCHEMA', N'dbo',
+'TABLE', N'{$tableName}', NULL, NULL)) > 0)
+  EXEC sp_updateextendedproperty
+'MS_Description', N'{$comment}',
+'SCHEMA', N'dbo',
+'TABLE', N'{$tableName}'
+ELSE
+  EXEC sp_addextendedproperty
+'MS_Description', N'{$comment}',
+'SCHEMA', N'dbo',
+'TABLE', N'{$tableName}'";
+
+        return new AlterInstructions([], [$sql]);
     }
 }

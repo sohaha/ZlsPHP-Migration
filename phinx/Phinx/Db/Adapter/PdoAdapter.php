@@ -3,6 +3,7 @@
 namespace Phinx\Db\Adapter;
 
 use BadMethodCallException;
+use Phinx\Config\Config;
 use Phinx\Console\Command\OutputInterface;
 use Phinx\Db\Action\AddColumn;
 use Phinx\Db\Action\AddForeignKey;
@@ -14,12 +15,14 @@ use Phinx\Db\Action\DropTable;
 use Phinx\Db\Action\RemoveColumn;
 use Phinx\Db\Action\RenameColumn;
 use Phinx\Db\Action\RenameTable;
+use Phinx\Db\Action\UpdateTable;
 use Phinx\Db\Table\Column;
 use Phinx\Db\Table\ForeignKey;
 use Phinx\Db\Table\Index;
 use Phinx\Db\Table\Table;
 use Phinx\Db\Util\AlterInstructions;
 use Phinx\Migration\MigrationInterface;
+use Z;
 
 /**
  * Phinx PDO Adapter.
@@ -207,9 +210,6 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getVersions()
     {
         $rows = $this->getVersionLog();
@@ -217,33 +217,29 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
         return array_keys($rows);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getVersionLog()
     {
+        // todo test
+        $logFields = $this->getLogFields();
         $result = [];
         switch ($this->options['version_order']) {
-            case \Phinx\Config\Config::VERSION_ORDER_CREATION_TIME:
-                $orderBy = 'version ASC';
+            case Config::VERSION_ORDER_CREATION_TIME:
+                $orderBy = z::arrayGet($logFields, 'start_time') . ' ASC';
                 break;
-            case \Phinx\Config\Config::VERSION_ORDER_EXECUTION_TIME:
-                $orderBy = 'start_time ASC, version ASC';
+            case Config::VERSION_ORDER_EXECUTION_TIME:
+                $orderBy = z::arrayGet($logFields, 'start_time') . ' ASC, ' . z::arrayGet($logFields, 'version') . ' ASC';
                 break;
             default:
                 throw new \RuntimeException('Invalid version_order configuration option');
         }
         $rows = $this->fetchAll(sprintf('SELECT * FROM %s ORDER BY %s', $this->getSchemaTableName(), $orderBy));
         foreach ($rows as $version) {
-            $result[$version['version']] = $version;
+            $result[$version[z::arrayGet($logFields, 'version')]] = $version;
         }
 
         return $result;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function fetchAll($sql)
     {
         $rows = [];
@@ -255,21 +251,20 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
         return $rows;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function migrated(MigrationInterface $migration, $direction, $startTime, $endTime)
     {
+        //todo test
+        $logFields = $this->getLogFields();
         if (strcasecmp($direction, MigrationInterface::UP) === 0) {
             // up
             $sql = sprintf(
                 "INSERT INTO %s (%s, %s, %s, %s, %s) VALUES ('%s', '%s', '%s', '%s', %s);",
                 $this->quoteTableName($this->getSchemaTableName()),
-                $this->quoteColumnName('version'),
-                $this->quoteColumnName('migration_name'),
-                $this->quoteColumnName('start_time'),
-                $this->quoteColumnName('end_time'),
-                $this->quoteColumnName('breakpoint'),
+                $this->quoteColumnName(z::arrayGet($logFields, 'version')),
+                $this->quoteColumnName(z::arrayGet($logFields, 'migration_name')),
+                $this->quoteColumnName(z::arrayGet($logFields, 'start_time')),
+                $this->quoteColumnName(z::arrayGet($logFields, 'end_time')),
+                $this->quoteColumnName(z::arrayGet($logFields, 'breakpoint')),
                 $migration->getVersion(),
                 substr($migration->getName(), 0, 100),
                 $startTime,
@@ -282,7 +277,7 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
             $sql = sprintf(
                 "DELETE FROM %s WHERE %s = '%s'",
                 $this->quoteTableName($this->getSchemaTableName()),
-                $this->quoteColumnName('version'),
+                $this->quoteColumnName(z::arrayGet($logFields, 'version')),
                 $migration->getVersion()
             );
             $this->execute($sql, false);
@@ -291,9 +286,6 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function execute($sql, $showSql = true)
     {
         static $i = false;
@@ -333,16 +325,17 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      */
     public function toggleBreakpoint(MigrationInterface $migration)
     {
+        $logFields = $this->getLogFields();
         $this->query(
             sprintf(
                 'UPDATE %1$s SET %2$s = CASE %2$s WHEN %3$s THEN %4$s ELSE %3$s END, %7$s = %7$s WHERE %5$s = \'%6$s\';',
                 $this->getSchemaTableName(),
-                $this->quoteColumnName('breakpoint'),
+                $this->quoteColumnName(z::arrayGet($logFields, 'breakpoint')),
                 $this->castToBool(true),
                 $this->castToBool(false),
-                $this->quoteColumnName('version'),
+                $this->quoteColumnName(z::arrayGet($logFields, 'version')),
                 $migration->getVersion(),
-                $this->quoteColumnName('start_time')
+                $this->quoteColumnName(z::arrayGet($logFields, 'start_time'))
             )
         );
 
@@ -354,13 +347,15 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      */
     public function resetAllBreakpoints()
     {
+        $logFields = $this->getLogFields();
+
         return $this->execute(
             sprintf(
                 'UPDATE %1$s SET %2$s = %3$s, %4$s = %4$s WHERE %2$s <> %3$s;',
                 $this->getSchemaTableName(),
-                $this->quoteColumnName('breakpoint'),
+                $this->quoteColumnName(z::arrayGet($logFields, 'breakpoint')),
                 $this->castToBool(false),
-                $this->quoteColumnName('start_time')
+                $this->quoteColumnName(z::arrayGet($logFields, 'start_time'))
             )
         );
     }
@@ -450,6 +445,11 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
     {
         $alter = sprintf('ALTER TABLE %s %%s', $this->quoteTableName($tableName));
         $instructions->execute($alter, [$this, 'execute']);
+    }
+
+    public function setComment()
+    {
+
     }
 
     /**
@@ -707,6 +707,16 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
                         $action->getNewName()
                     ));
                     break;
+                case ($action instanceof UpdateTable):
+                    if (z::arrayKeyExists('comment', $action->getOptions())) {
+                        $UpdateTableInstructions = $this->getUpdateTableInstructions(
+                            $table->getName(), z::arrayGet($action->getOptions(), 'comment')
+                        );
+                        if ($UpdateTableInstructions) {
+                            $instructions->merge($UpdateTableInstructions);
+                        }
+                    }
+                    break;
                 default:
                     throw new \InvalidArgumentException(
                         sprintf("Don't know how to execute action: '%s'", get_class($action))
@@ -715,6 +725,8 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
         }
         $this->executeAlterSteps($table->getName(), $instructions);
     }
+
+    abstract protected function getUpdateTableInstructions($tableName, $options);
 
     /**
      * Get the definition for a `DEFAULT` statement.

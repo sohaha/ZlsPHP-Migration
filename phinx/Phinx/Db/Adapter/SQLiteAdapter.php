@@ -1009,4 +1009,9 @@ class SQLiteAdapter extends PdoAdapter implements AdapterInterface
 
         return $this->copyAndDropTmpTable($instructions, $tableName);
     }
+
+    protected function getUpdateTableInstructions($tableName, $options)
+    {
+        // TODO: Implement getUpdateTableInstructions() method.
+    }
 }

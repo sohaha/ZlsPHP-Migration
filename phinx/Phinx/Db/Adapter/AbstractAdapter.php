@@ -6,6 +6,7 @@ use Phinx\Console\Command\OutputInterface;
 use Phinx\Db\Table;
 use Phinx\Db\Table\Column;
 use Phinx\Util\Literal;
+use Z;
 use Zls\Migration\Argv as InputInterface;
 
 /**
@@ -23,9 +24,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     protected $input;
 
-    /**
-     * @var Phinx\Console\Command\OutputInterface
-     */
+
     protected $output;
 
     /**
@@ -33,9 +32,7 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     protected $schemaTableName = 'phinxlog';
 
-    /**
-     * Class Constructor.
-     */
+
     public function __construct(array $options, InputInterface $input = null, OutputInterface $output = null)
     {
         $this->setOptions($options);
@@ -47,30 +44,6 @@ abstract class AbstractAdapter implements AdapterInterface
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getOptions()
-    {
-        return $this->options;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setOptions(array $options)
-    {
-        $this->options = $options;
-        if (isset($options['default_migration_table'])) {
-            $this->setSchemaTableName($options['default_migration_table']);
-        }
-
-        return $this;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getOutput()
     {
         if ($this->output === null) {
@@ -81,9 +54,6 @@ abstract class AbstractAdapter implements AdapterInterface
         return $this->output;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setOutput(OutputInterface $output)
     {
         $this->output = $output;
@@ -91,10 +61,6 @@ abstract class AbstractAdapter implements AdapterInterface
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     * @return array
-     */
     public function getVersions()
     {
         $rows = $this->getVersionLog();
@@ -102,18 +68,11 @@ abstract class AbstractAdapter implements AdapterInterface
         return array_keys($rows);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function hasSchemaTable()
     {
         return $this->hasTable($this->getSchemaTableName());
     }
 
-    /**
-     * Gets the schema table name.
-     * @return string
-     */
     public function getSchemaTableName()
     {
         return $this->schemaTableName;
@@ -121,7 +80,6 @@ abstract class AbstractAdapter implements AdapterInterface
 
     /**
      * Sets the schema table name.
-     * @param string $schemaTableName Schema Table Name
      * @return $this
      */
     public function setSchemaTableName($schemaTableName)
@@ -131,22 +89,20 @@ abstract class AbstractAdapter implements AdapterInterface
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function createSchemaTable()
     {
+        $logFields = $this->getLogFields();
         try {
             $options = [
                 'id'          => false,
-                'primary_key' => 'version',
+                'primary_key' => z::arrayGet($logFields, 'version'),
             ];
             $table = new Table($this->getSchemaTableName(), $options, $this);
-            $table->addColumn('version', 'biginteger')
-                  ->addColumn('migration_name', 'string', ['limit' => 100, 'default' => null, 'null' => true])
-                  ->addColumn('start_time', 'timestamp', ['default' => null, 'null' => true])
-                  ->addColumn('end_time', 'timestamp', ['default' => null, 'null' => true])
-                  ->addColumn('breakpoint', 'boolean', ['default' => false])
+            $table->addColumn(z::arrayGet($logFields, 'version'), 'biginteger', ['comment' => '主键'])
+                  ->addColumn(z::arrayGet($logFields, 'migration_name'), 'string', ['comment' => '迁移名称', 'limit' => 100, 'default' => null, 'null' => true])
+                  ->addColumn(z::arrayGet($logFields, 'start_time'), 'datetime', ['comment' => '开始时间', 'default' => null, 'null' => true])
+                  ->addColumn(z::arrayGet($logFields, 'end_time'), 'datetime', ['comment' => '结束时间', 'default' => null, 'null' => true])
+                  ->addColumn(z::arrayGet($logFields, 'breakpoint'), 'boolean', ['comment' => '断点', 'default' => false])
                   ->save();
         } catch (\Exception $exception) {
             throw new \InvalidArgumentException(
@@ -157,17 +113,39 @@ abstract class AbstractAdapter implements AdapterInterface
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    public function getLogFields()
+    {
+        $logFields = z::arrayGet($this->getOptions(), 'log_fields');
+
+        return [
+            'version'        => z::arrayGet($logFields, 'version', 'version'),
+            'migration_name' => z::arrayGet($logFields, 'migration_name', 'migration_name'),
+            'start_time'     => z::arrayGet($logFields, 'start_time', 'start_time'),
+            'end_time'       => z::arrayGet($logFields, 'end_time', 'end_time'),
+            'breakpoint'     => z::arrayGet($logFields, 'breakpoint', 'breakpoint'),
+        ];
+    }
+
+    public function getOptions()
+    {
+        return $this->options;
+    }
+
+    public function setOptions(array $options)
+    {
+        $this->options = $options;
+        if (isset($options['default_migration_table'])) {
+            $this->setSchemaTableName($options['default_migration_table']);
+        }
+
+        return $this;
+    }
+
     public function getAdapterType()
     {
         return $this->getOption('adapter');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getOption($name)
     {
         if (!$this->hasOption($name)) {
@@ -177,17 +155,11 @@ abstract class AbstractAdapter implements AdapterInterface
         return $this->options[$name];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function hasOption($name)
     {
         return isset($this->options[$name]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isValidColumnType(Column $column)
     {
         return $column->getType() instanceof Literal || in_array($column->getType(), $this->getColumnTypes());
@@ -204,17 +176,11 @@ abstract class AbstractAdapter implements AdapterInterface
         return ($input && $input->get('dry-run')) ? $input->get('dry-run') : false;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getInput()
     {
         return $this->input;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setInput(InputInterface $input)
     {
         $this->input = $input;

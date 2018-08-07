@@ -38,7 +38,7 @@ class Intent
 
     /**
      * Returns the full list of actions
-     * @return Action[]
+     * @return array
      */
     public function getActions()
     {

@@ -31,6 +31,7 @@ $ini = is_file($migrationPath = $origin . 'migration.ini') ? @parse_ini_file($mi
 $ini = z::arrayGet($ini, 'base');
 $versionOrder = z::arrayGet($ini, 'versionOrder', 'creation');
 $migrationTable = z::arrayGet($ini, 'migrationTable', 'migrations_log');
+$fields = z::arrayGet($ini, 'logFields', []);
 // 表迁移目录
 $migrationPathDefault = 'database/migrations';
 $migrationPath = z::arrayMap((array)z::arrayGet($ini, 'migrationPath', $migrationPathDefault), function ($v) use ($origin, $migrationPathDefault) {
@@ -50,6 +51,9 @@ return [
     'paths'         => [
         'migrations' => $migrationPath,
         'seeds'      => $seedPath,
+    ],
+    'aliases'       => [
+        'fields' => $fields,
     ],
     'environments'  => [
         'default_migration_table' => $confing['tablePrefix'] . $migrationTable,

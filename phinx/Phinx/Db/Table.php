@@ -14,6 +14,7 @@ use Phinx\Db\Action\DropTable;
 use Phinx\Db\Action\RemoveColumn;
 use Phinx\Db\Action\RenameColumn;
 use Phinx\Db\Action\RenameTable;
+use Phinx\Db\Action\UpdateTable;
 use Phinx\Db\Adapter\AdapterInterface;
 use Phinx\Db\Plan\Intent;
 use Phinx\Db\Plan\Plan;
@@ -168,6 +169,13 @@ class Table
     {
         $action = RenameColumn::build($this->table, $oldName, $newName);
         $this->actions->addAction($action);
+
+        return $this;
+    }
+
+    public function comment($comment = '')
+    {
+        $this->actions->addAction(new UpdateTable($this->table, ['comment' => $comment]));
 
         return $this;
     }

@@ -2,6 +2,8 @@
 
 namespace Phinx\Config;
 
+use Z;
+
 /**
  * Phinx configuration class.
  * @package Phinx
@@ -198,7 +200,7 @@ class Config implements ConfigInterface, NamespaceAwareInterface
      */
     public function getAlias($alias)
     {
-        return !empty($this->values['aliases'][$alias]) ? $this->values['aliases'][$alias] : null;
+        return z::arrayGet($this->values,'aliases.'.$alias);
     }
 
     /**

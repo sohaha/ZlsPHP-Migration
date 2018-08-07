@@ -13,6 +13,7 @@ use Phinx\Db\Action\DropTable;
 use Phinx\Db\Action\RemoveColumn;
 use Phinx\Db\Action\RenameColumn;
 use Phinx\Db\Action\RenameTable;
+use Phinx\Db\Action\UpdateTable;
 use Phinx\Db\Adapter\AdapterInterface;
 use Phinx\Db\Table\Table;
 use Phinx\Util\Util;
@@ -67,7 +68,7 @@ class Plan
 
     /**
      * Parses the given Intent and creates the separate steps to execute
-     * @param Intent $actions The actions to use for the plan
+     * @param array $actions The actions to use for the plan
      * @return void
      */
     protected function createPlan($actions)
@@ -121,10 +122,12 @@ class Plan
     protected function gatherUpdates($actions)
     {
         $tableUpdates = Util::filter($actions, function ($action) {
-            return ($action instanceof AddColumn
+            return (
+                    $action instanceof AddColumn
                     || $action instanceof ChangeColumn
                     || $action instanceof RemoveColumn
-                    || $action instanceof RenameColumn) && !isset($this->tableCreates[$action->getTable()->getName()]);
+                    || $action instanceof RenameColumn
+                ) && !isset($this->tableCreates[$action->getTable()->getName()]);
         });
         foreach ($tableUpdates as $action) {
             $table = $action->getTable();
@@ -144,8 +147,7 @@ class Plan
     protected function gatherTableMoves($actions)
     {
         $tableMoves = Util::filter($actions, function ($action) {
-            return $action instanceof DropTable
-                || $action instanceof RenameTable;
+            return $action instanceof DropTable || $action instanceof UpdateTable || $action instanceof RenameTable;
         });
         foreach ($tableMoves as $action) {
             $table = $action->getTable();

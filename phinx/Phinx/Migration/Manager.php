@@ -10,6 +10,7 @@ use Phinx\Migration\Manager\Environment;
 use Phinx\Seed\AbstractSeed;
 use Phinx\Seed\SeedInterface;
 use Phinx\Util\Util;
+use Z;
 use Zls\Migration\Argv as InputInterface;
 
 class Manager
@@ -68,6 +69,12 @@ class Manager
      */
     public function printStatus($environment, $format = null)
     {
+        $Fields = $this->getLogFields();
+        $FstartTime = z::arrayGet($Fields, 'start_time');
+        $Fversion = z::arrayGet($Fields, 'version');
+        $FmigrationName = z::arrayGet($Fields, 'migration_name');
+        $FendTime = z::arrayGet($Fields, 'end_time');
+        $Fbreakpoint = z::arrayGet($Fields, 'breakpoint');
         $output = $this->getOutput();
         $hasDownMigration = false;
         $hasMissingMigration = false;
@@ -93,8 +100,8 @@ class Manager
             $output->writeln('------------------------------------------------------------------------------------------');
             $env = $this->getEnvironment($environment);
             $versions = $env->getVersionLog();
-            $maxNameLength = $versions ? max(array_map(function ($version) {
-                return strlen($version['migration_name']);
+            $maxNameLength = $versions ? max(array_map(function ($version) use($FmigrationName){
+                return strlen($version[$FmigrationName]);
             }, $versions)) : 0;
             $missingVersions = array_diff_key($versions, $migrations);
             $missingCount = count($missingVersions);
@@ -127,14 +134,14 @@ class Manager
                     // check if there are missing versions before this version
                     foreach ($missingVersions as $missingVersionCreationTime => $missingVersion) {
                         if ($this->getConfig()->isVersionOrderCreationTime()) {
-                            if ($missingVersion['version'] > $version['version']) {
+                            if ($missingVersion[$Fversion] > $version[$Fversion]) {
                                 break;
                             }
                         } else {
-                            if ($missingVersion['start_time'] > $version['start_time']) {
+                            if ($missingVersion[$FstartTime] > $version[$FstartTime]) {
                                 break;
-                            } elseif ($missingVersion['start_time'] == $version['start_time'] &&
-                                $missingVersion['version'] > $version['version']) {
+                            } elseif ($missingVersion[$FstartTime] == $version[$FstartTime] &&
+                                $missingVersion[$Fversion] > $version[$Fversion]) {
                                 break;
                             }
                         }
@@ -152,11 +159,11 @@ class Manager
                     '%s %14.0f  %23s  %23s  ' . $this->getOutput()->tipText('%s'),
                     $status,
                     $migration->getVersion(),
-                    $version['start_time'],
-                    $version['end_time'],
+                    $version[$FstartTime],
+                    $version[$FendTime],
                     $migration->getName()
                 ));
-                if ($version && $version['breakpoint']) {
+                if ($version && $version[$Fbreakpoint]) {
                     $output->writeln($output->errorText('         BREAKPOINT SET'));
                 }
                 $migrations[] = ['migration_status' => trim(strip_tags($status)), 'migration_id' => sprintf('%14.0f', $migration->getVersion()), 'migration_name' => $migration->getName()];
@@ -411,19 +418,21 @@ class Manager
      */
     public function getEnvironment($name)
     {
+        $config = $this->getConfig();
         if (isset($this->environments[$name])) {
             return $this->environments[$name];
         }
         // check the environment exists
-        if (!$this->getConfig()->hasEnvironment($name)) {
+        if (!$config->hasEnvironment($name)) {
             throw new \InvalidArgumentException(sprintf(
                 'The environment "%s" does not exist',
                 $name
             ));
         }
         // create an environment instance and cache it
-        $envOptions = $this->getConfig()->getEnvironment($name);
+        $envOptions = $config->getEnvironment($name);
         $envOptions['version_order'] = $this->getConfig()->getVersionOrder();
+        $envOptions['log_fields'] = $config->getAlias('fields');
         $environment = new Environment($name, $envOptions);
         $this->environments[$name] = $environment;
         $environment->setInput($this->getInput());
@@ -439,14 +448,20 @@ class Manager
      */
     private function printMissingVersion($version, $maxNameLength)
     {
+        $Fields = $this->getLogFields();
+        $FstartTime = z::arrayGet($Fields, 'start_time');
+        $Fversion = z::arrayGet($Fields, 'version');
+        $FmigrationName = z::arrayGet($Fields, 'migration_name');
+        $FendTime = z::arrayGet($Fields, 'end_time');
+        $Fbreakpoint = z::arrayGet($Fields, 'breakpoint');
         $this->getOutput()->writeln(sprintf(
             $this->getOutput()->errorText('     up') . '  %14.0f  %19s  %19s  ' . $this->getOutput()->warningText('%s') . $this->getOutput()->errorText('** MISSING **'),
-            $version['version'],
-            $version['start_time'],
-            $version['end_time'],
-            str_pad($version['migration_name'], $maxNameLength, ' ')
+            $version[$Fversion],
+            $version[$FstartTime],
+            $version[$FendTime],
+            str_pad($version[$FmigrationName], $maxNameLength, ' ')
         ));
-        if ($version && $version['breakpoint']) {
+        if ($version && $version[$Fbreakpoint]) {
             $this->getOutput()->writeln($this->getOutput()->errorText('         BREAKPOINT SET'));
         }
     }
@@ -566,6 +581,12 @@ class Manager
      */
     public function rollback($environment, $target = null, $force = false, $targetMustMatchVersion = true, $fake = false)
     {
+        $Fields = $this->getLogFields();
+        $FstartTime = z::arrayGet($Fields, 'start_time');
+        $Fversion = z::arrayGet($Fields, 'version');
+        $FmigrationName = z::arrayGet($Fields, 'migration_name');
+        $FendTime = z::arrayGet($Fields, 'end_time');
+        $Fbreakpoint = z::arrayGet($Fields, 'breakpoint');
         $migrations = $this->getMigrations($environment);
         $executedVersions = $this->getEnvironment($environment)->getVersionLog();
         $sortedMigrations = [];
@@ -573,8 +594,8 @@ class Manager
             // if we have a date (ie. the target must not match a version) and we are sorting by execution time, we
             // convert the version start time so we can compare directly with the target date
             if (!$this->getConfig()->isVersionOrderCreationTime() && !$targetMustMatchVersion) {
-                $dateTime = \DateTime::createFromFormat('Y-m-d H:i:s', $executedVersion['start_time']);
-                $executedVersion['start_time'] = $dateTime->format('YmdHis');
+                $dateTime = \DateTime::createFromFormat('Y-m-d H:i:s', $executedVersion[$FstartTime]);
+                $executedVersion[$FstartTime] = $dateTime->format('YmdHis');
             }
             if (isset($migrations[$versionCreationTime])) {
                 array_unshift($sortedMigrations, $migrations[$versionCreationTime]);
@@ -588,8 +609,8 @@ class Manager
             $target = 0;
         } elseif (!is_numeric($target) && !is_null($target)) { // try to find a target version based on name
             // search through the migrations using the name
-            $migrationNames = array_map(function ($item) {
-                return $item['migration_name'];
+            $migrationNames = array_map(function ($item) use ($FmigrationName) {
+                return $item[$FmigrationName];
             }, $executedVersions);
             $found = array_search($target, $migrationNames);
             // check on was found
@@ -629,12 +650,12 @@ class Manager
             if (in_array($migration->getVersion(), $executedVersionCreationTimes)) {
                 $executedVersion = $executedVersions[$migration->getVersion()];
                 if (!$targetMustMatchVersion) {
-                    if (($this->getConfig()->isVersionOrderCreationTime() && $executedVersion['version'] <= $target) ||
-                        (!$this->getConfig()->isVersionOrderCreationTime() && $executedVersion['start_time'] <= $target)) {
+                    if (($this->getConfig()->isVersionOrderCreationTime() && $executedVersion[$Fversion] <= $target) ||
+                        (!$this->getConfig()->isVersionOrderCreationTime() && $executedVersion[$FstartTime] <= $target)) {
                         break;
                     }
                 }
-                if (0 != $executedVersion['breakpoint'] && !$force) {
+                if (0 != $executedVersion[$Fbreakpoint] && !$force) {
                     $this->getOutput()->writeln(($this->getOutput()->errorText('Breakpoint reached. Further rollbacks inhibited.')));
                     break;
                 }
@@ -645,6 +666,19 @@ class Manager
         if (!$rollbacked) {
             $this->getOutput()->writeln(PHP_EOL . $this->getOutput()->warningText('No migrations to rollback'));
         }
+    }
+
+    public function getLogFields()
+    {
+        $logFields = $this->getConfig()->getAlias('fields');
+
+        return [
+            'version'        => z::arrayGet($logFields, 'version', 'version'),
+            'migration_name' => z::arrayGet($logFields, 'migration_name', 'migration_name'),
+            'start_time'     => z::arrayGet($logFields, 'start_time', 'start_time'),
+            'end_time'       => z::arrayGet($logFields, 'end_time', 'end_time'),
+            'breakpoint'     => z::arrayGet($logFields, 'breakpoint', 'breakpoint'),
+        ];
     }
 
     /**
