@@ -116,7 +116,7 @@ class Migration extends Command
 
     public function init($args)
     {
-        $force = Z::arrayGet($args, ['-force', 'F']);
+        $force = Z::arrayGet($args, ['-force', 'F','f']);
         $path = z::realPath(__DIR__ . '/../migration.ini', false, false);
         $this->copyFile($path, $this->vendorPath . '../migration.ini', $force, function ($state) {
             if (!$state) {

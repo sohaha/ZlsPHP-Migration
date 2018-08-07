@@ -18,29 +18,29 @@ class SeedRun extends AbstractCommand
         $environment = parent::$environment;
         if ($environment === null) {
             $environment = $this->getConfig()->getDefaultEnvironment();
-            $output->writeln('<comment>warning</comment> no environment specified, defaulting to: ' . $environment);
+            $output->writeln($output->warningText('warning') . ' no environment specified, defaulting to: ' . $environment);
         } else {
-            $output->writeln('<info>using environment</info> ' . $environment);
+            $output->writeln($output->infoText('using environment ') . $environment);
         }
         $envOptions = $this->getConfig()->getEnvironment($environment);
         if (isset($envOptions['adapter'])) {
-            $output->writeln('<info>using adapter</info> ' . $envOptions['adapter']);
+            $output->writeln($output->infoText('using adapter ') . $envOptions['adapter']);
         }
         if (isset($envOptions['wrapper'])) {
-            $output->writeln('<info>using wrapper</info> ' . $envOptions['wrapper']);
+            $output->writeln($output->infoText('using wrapper ') . $envOptions['wrapper']);
         }
         if (isset($envOptions['name'])) {
-            $output->writeln('<info>using database</info> ' . $envOptions['name']);
+            $output->writeln($output->infoText('using database ') . $envOptions['name']);
         } else {
-            $output->writeln('<error>Could not determine database name! Please specify a database name in your config file.</error>');
+            $output->writeln($output->errorText('Could not determine database name! Please specify a database name in your config file.'));
 
             return;
         }
         if (isset($envOptions['table_prefix'])) {
-            $output->writeln('<info>using table prefix</info> ' . $envOptions['table_prefix']);
+            $output->writeln($output->infoText('using table prefix ') . $envOptions['table_prefix']);
         }
         if (isset($envOptions['table_suffix'])) {
-            $output->writeln('<info>using table suffix</info> ' . $envOptions['table_suffix']);
+            $output->writeln($output->infoText('using table suffix ') . $envOptions['table_suffix']);
         }
         $start = microtime(true);
         if (empty($seedSet)) {
@@ -54,7 +54,7 @@ class SeedRun extends AbstractCommand
         }
         $end = microtime(true);
         $output->writeln('');
-        $output->writeln('<comment>All Done. Took ' . sprintf('%.4fs', $end - $start) . '</comment>');
+        $output->writeln($output->tipText('All Done. Took ' . sprintf('%.4fs', $end - $start)));
     }
 
     public function description()

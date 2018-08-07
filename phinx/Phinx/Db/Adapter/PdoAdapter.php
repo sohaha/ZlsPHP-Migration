@@ -105,24 +105,27 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      */
     public function setConnection(\PDO $connection)
     {
+        $logFields = $this->getLogFields();
+        $migrationName  = z::arrayGet($logFields, 'migration_name');
+        $breakpoint  = z::arrayGet($logFields, 'breakpoint');
         $this->connection = $connection;
         // Create the schema table if it doesn't already exist
         if (!$this->hasSchemaTable()) {
             $this->createSchemaTable();
         } else {
             $table = new \Phinx\Db\Table($this->getSchemaTableName(), [], $this);
-            if (!$table->hasColumn('migration_name')) {
+            if (!$table->hasColumn($migrationName)) {
                 $table
                     ->addColumn(
-                        'migration_name',
+                        $migrationName,
                         'string',
                         ['limit' => 100, 'after' => 'version', 'default' => null, 'null' => true]
                     )
                     ->save();
             }
-            if (!$table->hasColumn('breakpoint')) {
+            if (!$table->hasColumn($breakpoint)) {
                 $table
-                    ->addColumn('breakpoint', 'boolean', ['default' => false])
+                    ->addColumn($breakpoint, 'boolean', ['default' => false])
                     ->save();
             }
         }

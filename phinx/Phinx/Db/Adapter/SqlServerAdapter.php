@@ -617,7 +617,7 @@ SQL;
     }
 
     /**
-     * {@inheritdoc}
+     * 添加字段
      */
     protected function getAddColumnInstructions(Table $table, Column $column)
     {
@@ -627,13 +627,14 @@ SQL;
             $this->quoteColumnName($column->getName()),
             $this->getColumnSqlDefinition($column)
         );
+        $post = [$alter];
+        if ($column->getComment()) {
+            $post[] = $this->getColumnCommentSqlDefinition($column, $table->getName());
+        }
 
-        return new AlterInstructions([], [$alter]);
+        return new AlterInstructions([], $post);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function getChangeColumnInstructions($tableName, $columnName, Column $newColumn)
     {
         $columns = $this->getColumns($tableName);
@@ -649,12 +650,14 @@ SQL;
         if ($changeDefault) {
             $instructions->merge($this->getDropDefaultConstraint($tableName, $newColumn->getName()));
         }
-        $instructions->addPostStep(sprintf(
-            'ALTER TABLE %s ALTER COLUMN %s %s',
-            $this->quoteTableName($tableName),
-            $this->quoteColumnName($newColumn->getName()),
-            $this->getColumnSqlDefinition($newColumn, false)
-        ));
+        //$type = $newColumn->getType();
+        //\z::dump($changeDefault,$type,$columns[$columnName]->getType(),$columns[$columnName]->getDefault(),$newColumn->getDefault());
+            $instructions->addPostStep(sprintf(
+                'ALTER TABLE %s ALTER COLUMN %s %s',
+                $this->quoteTableName($tableName),
+                $this->quoteColumnName($newColumn->getName()),
+                $this->getColumnSqlDefinition($newColumn, false)
+            ));
         // change column comment if needed
         if ($newColumn->getComment()) {
             $instructions->addPostStep($this->getColumnCommentSqlDefinition($newColumn, $tableName));
@@ -857,9 +860,6 @@ WHERE
         return empty($rows) ? false : $rows[0]['name'];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function getDropForeignKeyInstructions($tableName, $constraint)
     {
         $instructions = new AlterInstructions();

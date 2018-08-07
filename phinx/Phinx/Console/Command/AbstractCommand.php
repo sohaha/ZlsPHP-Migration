@@ -54,7 +54,7 @@ class AbstractCommand extends Command
         self::$target = $input->get(['-target', 't']);
         self::$date = $input->get(['-date', 'date']);
         self::$fake = (bool)$input->get(['-fake']);
-        self::$force = (bool)$input->get(['-force']);
+        self::$force = (bool)$input->get(['-force','f','F']);
         if (!self::$name = $input->get(['-name'])) {
             foreach ($input->get() as $k => $v) {
                 if (!is_numeric($k) || $k <= 2) {

@@ -472,6 +472,7 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
     /**
      * Returns Phinx type by SQL type
      * @param string $sqlTypeDef
+     * @return array
      * @throws \RuntimeException
      * @internal param string $sqlType SQL type
      * @returns string Phinx type
@@ -861,9 +862,6 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
         ));
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function getChangeColumnInstructions($tableName, $columnName, Column $newColumn)
     {
         $after = $newColumn->getAfter() ? ' AFTER ' . $this->quoteColumnName($newColumn->getAfter()) : '';
@@ -878,9 +876,6 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
         return new AlterInstructions([$alter]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function getDropColumnInstructions($tableName, $columnName)
     {
         $alter = sprintf('DROP COLUMN %s', $this->quoteColumnName($columnName));
@@ -888,9 +883,6 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
         return new AlterInstructions([$alter]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function getAddIndexInstructions(Table $table, Index $index)
     {
         $instructions = new AlterInstructions();
@@ -914,9 +906,6 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
         return $instructions;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function getDropIndexByColumnsInstructions($tableName, $columns)
     {
         if (is_string($columns)) {
@@ -940,9 +929,6 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
         ));
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function getDropIndexByNameInstructions($tableName, $indexName)
     {
 
@@ -963,9 +949,6 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
         ));
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function getAddForeignKeyInstructions(Table $table, ForeignKey $foreignKey)
     {
         $alter = sprintf(

@@ -49,7 +49,9 @@ class ChangeColumn extends Action
     {
         $column = new Column();
         $column->setName($columnName);
-        $column->setType($type);
+        if (!!$type) {
+            $column->setType($type);
+        }
         $column->setOptions($options); // map options to column methods
 
         return new static($table, $columnName, $column);

@@ -883,20 +883,27 @@ class Manager
      */
     public function toggleBreakpoint($environment, $version)
     {
+
         $migrations = $this->getMigrations($environment);
         $this->getMigrations($environment);
         $env = $this->getEnvironment($environment);
         $versions = $env->getVersionLog();
+        $Fields = $this->getLogFields();
+        $FstartTime = z::arrayGet($Fields, 'start_time');
+        $Fversion = z::arrayGet($Fields, 'version');
+        $FmigrationName = z::arrayGet($Fields, 'migration_name');
+        $FendTime = z::arrayGet($Fields, 'end_time');
+        $Fbreakpoint = z::arrayGet($Fields, 'breakpoint');
         if (empty($versions) || empty($migrations)) {
             return;
         }
         if ($version === null) {
             $lastVersion = end($versions);
-            $version = $lastVersion['version'];
+            $version = $lastVersion[$Fversion];
         }
         if (0 != $version && !isset($migrations[$version])) {
             $this->output->writeln(sprintf(
-                '<comment>warning</comment> %s is not a valid version',
+                $this->output->warningText('warning').' %s is not a valid version',
                 $version
             ));
 
@@ -905,7 +912,7 @@ class Manager
         $env->getAdapter()->toggleBreakpoint($migrations[$version]);
         $versions = $env->getVersionLog();
         $this->getOutput()->writeln(
-            ' Breakpoint ' . ($versions[$version]['breakpoint'] ? 'set' : 'cleared') .
+            ' Breakpoint ' . ($versions[$version][$Fbreakpoint] ? 'set' : 'cleared') .
             ' for ' . $this->getOutput()->infoText($version) .
             $this->getOutput()->warningText(' ' . $migrations[$version]->getName())
         );

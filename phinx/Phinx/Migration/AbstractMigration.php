@@ -24,12 +24,12 @@ abstract class AbstractMigration implements MigrationInterface
     protected $adapter;
 
     /**
-     * @var \Symfony\Component\Console\Output\OutputInterface
+     * @var \Phinx\Console\Command\OutputInterface
      */
     protected $output;
 
     /**
-     * @var \Symfony\Component\Console\Input\InputInterface
+     * @var InputInterface
      */
     protected $input;
 
@@ -284,7 +284,7 @@ abstract class AbstractMigration implements MigrationInterface
             if (method_exists($this, MigrationInterface::UP) ||
                 method_exists($this, MigrationInterface::DOWN)) {
                 $this->output->writeln(sprintf(
-                    '<comment>warning</comment> Migration contains both change() and/or up()/down() methods.  <options=bold>Ignoring up() and down()</>.'
+                    $this->output->warningText('Migration contains both change() and/or up()/down() methods.').' Ignoring up() and down().'
                 ));
             }
         }
