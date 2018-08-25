@@ -8,12 +8,13 @@ use Zls\Command\Command;
 
 /**
  * Zls
+ *
  * @author        影浅
  * @email         seekwe@gmail.com
  * @copyright     Copyright (c) 2015 - 2017, 影浅, Inc.
  * @link          ---
- * @since         v0.0.1
- * @updatetime    2018-07-17 15:31
+ * @since         v0.0.2
+ * @updatetime    2018-8-25 15:14:48
  */
 class Migration extends Command
 {
@@ -23,23 +24,29 @@ class Migration extends Command
     public function __construct()
     {
         parent::__construct();
-        $this->vendorPath = getcwd() . '/vendor/';
-        $this->configFilePath = __DIR__ . '/../phinx.php';
+        $this->vendorPath = getcwd().'/vendor/';
+        $this->configFilePath = __DIR__.'/../phinx.php';
     }
 
 
     /**
      * 命令配置
+     *
      * @return array
      */
     public function options()
     {
-        return [];
+        return [
+            '-h' => 'View help',
+        ];
     }
 
     public function example()
     {
-        return [];
+        return [
+            ' rollback -h ' => 'Rollback command help',
+            ' rollback -t 0 ' => 'Rollback all',
+        ];
     }
 
     /**
@@ -53,6 +60,7 @@ class Migration extends Command
 
     /**
      * 命令默认执行
+     *
      * @param $args
      */
     public function execute($args)
@@ -85,22 +93,23 @@ class Migration extends Command
         return $argv;
     }
 
-    public function handle()
+    public function commands()
     {
         return [
-            ' init'        => 'Initialize Phinx Config',
-            ' create'      => 'Create a new migration',
-            ' migrate'     => 'Migrate the database',
-            ' rollback'    => 'Rollback the last or to a specific migration',
-            ' breakpoint'  => 'Manage breakpoints',
-            ' status'      => 'Show migration status',
+            ' init' => 'Initialize Phinx Config',
+            ' create' => 'Create a new migration',
+            ' migrate' => 'Migrate the database',
+            ' rollback' => 'Rollback the last or to a specific migration',
+            ' breakpoint' => 'Manage breakpoints',
+            ' status' => 'Show migration status',
             ' seed:create' => 'Create a new database seeder',
-            ' seed:run'    => 'Run database seeders',
+            ' seed:run' => 'Run database seeders',
         ];
     }
 
     /**
      * 命令介绍
+     *
      * @return string
      */
     public function description()
@@ -116,16 +125,17 @@ class Migration extends Command
 
     public function init($args)
     {
-        $force = Z::arrayGet($args, ['-force', 'F','f']);
-        $path = z::realPath(__DIR__ . '/../migration.ini', false, false);
-        $this->copyFile($path, $this->vendorPath . '../migration.ini', $force, function ($state) {
-            if (!$state) {
-                $this->error('migration.ini already exists');
-                $this->printStrN('you can use --force to force the config file');
-            } else {
-                $this->success('Created Config file migration.ini');
-            }
-        }, '');
+        $force = Z::arrayGet($args, ['-force', 'F', 'f']);
+        $path = z::realPath(__DIR__.'/../migration.ini', false, false);
+        $this->copyFile($path, $this->vendorPath.'../migration.ini', $force,
+            function ($state) {
+                if (!$state) {
+                    $this->error('migration.ini already exists');
+                    $this->printStrN('you can use --force to force the config file');
+                } else {
+                    $this->success('Created Config file migration.ini');
+                }
+            }, '');
     }
 
     private function clearArgs($args)
@@ -166,7 +176,14 @@ class Migration extends Command
 
     private function runPhinx($method, $args, $argv)
     {
-        $phinxEnvironment = ['rollback', 'migrate', 'status', 'breakpoint', 'm', 'r'];
+        $phinxEnvironment = [
+            'rollback',
+            'migrate',
+            'status',
+            'breakpoint',
+            'm',
+            'r',
+        ];
         $ignoreConfiguration = [
             'list',
             'l',
@@ -181,12 +198,12 @@ class Migration extends Command
             's:c',
         ];
         if (!in_array($method, $ignoreConfiguration)) {
-            $argv .= ' --configuration ' . $this->configFilePath;
+            $argv .= ' --configuration '.$this->configFilePath;
         }
         if (!in_array($method, $ignoreEnvironment)) {
             $argv .= ' -e production';
         }
-        $cmd = z::phpPath() . " {$this->phinxPath} {$method} {$argv}";
+        $cmd = z::phpPath()." {$this->phinxPath} {$method} {$argv}";
         if (z::arrayGet($args, '-debug')) {
             $this->printStrN($cmd);
         } else {
