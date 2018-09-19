@@ -61,7 +61,7 @@ class PhinxApplication
             } else {
                 $err = str_replace('Cannot reverse a "Phinx\Db\Action\RemoveColumn" command', 'Please check the script content is qualified.', $err);
             }
-            z::dump($e->getFile(),$e->getLine());
+            
             $this->error($err);
         }
 
