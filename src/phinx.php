@@ -2,7 +2,7 @@
 $origin = getcwd() . '/';
 z::config()
  ->addMasterPackage($origin . 'application/')
- ->setApplicationDir($origin . 'application/')
+ ->setAppDir($origin . 'application/')
  ->setDatabaseConfig('database');
 $confing = z::db()->getConfig();
 $migrationTable = z::arrayGet($confing, 'tablePrefix') . 'phinxlog';
