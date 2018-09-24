@@ -224,7 +224,7 @@ class Util
     {
         $tip = PHP_EOL;
         foreach ($paths as $key => $path) {
-            $path = z::safePath($path,'',getcwd());
+            $path = z::safePath($path, '', getcwd());
             $tip .= "  [{$key}] {$path}\n";
         }
         $tip .= "  >  ";

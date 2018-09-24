@@ -200,7 +200,7 @@ class Config implements ConfigInterface, NamespaceAwareInterface
      */
     public function getAlias($alias)
     {
-        return z::arrayGet($this->values,'aliases.'.$alias);
+        return z::arrayGet($this->values, 'aliases.'.$alias);
     }
 
     /**

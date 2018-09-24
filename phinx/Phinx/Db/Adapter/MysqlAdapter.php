@@ -15,7 +15,6 @@ use Phinx\Util\Literal;
  */
 class MysqlAdapter extends PdoAdapter implements AdapterInterface
 {
-
     const TEXT_TINY = 255;
     const TEXT_SMALL = 255;
     const TEXT_REGULAR = 65535; /* deprecated, alias of TEXT_TINY */
@@ -931,7 +930,6 @@ class MysqlAdapter extends PdoAdapter implements AdapterInterface
 
     protected function getDropIndexByNameInstructions($tableName, $indexName)
     {
-
         $indexes = $this->getIndexes($tableName);
         foreach ($indexes as $name => $index) {
             if ($name === $indexName) {

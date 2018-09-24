@@ -10,7 +10,6 @@ use Zls\Migration\Argv as InputInterface;
  */
 class SeedRun extends AbstractCommand
 {
-
     public function command(InputInterface $input, OutputInterface $output)
     {
         $this->bootstrap($input, $output);

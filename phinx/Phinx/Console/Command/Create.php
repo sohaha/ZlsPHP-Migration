@@ -163,10 +163,13 @@ class Create extends AbstractCommand
         // No paths? That's a problem.
         z::throwIf(empty($paths), 'Exception', 'No migration paths set in your Phinx configuration file.');
         $paths = Util::globAll($paths);
-        z::throwIf(empty($paths), 'Exception',
+        z::throwIf(
+            empty($paths),
+            'Exception',
             'You probably used curly braces to define migration path in your Phinx configuration file, ' .
             'but no directories have been matched using this pattern. ' .
-            'You need to create a migration directory manually.');
+            'You need to create a migration directory manually.'
+        );
         // Only one path set, so select that:
         if (1 === count($paths)) {
             return array_shift($paths);
@@ -198,10 +201,8 @@ class Create extends AbstractCommand
 
     public function options()
     {
-
         return [
             '--name' => 'The migration class name',
         ];
     }
-
 }

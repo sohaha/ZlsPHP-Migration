@@ -1,11 +1,11 @@
 <?php
-$origin = getcwd() . '/';
+$origin = getcwd().'/';
 z::config()
- ->addMasterPackage($origin . 'application/')
- ->setAppDir($origin . 'application/')
- ->setDatabaseConfig('database');
+    ->addMasterPackage($origin.'application/')
+    ->setAppDir($origin.'application/')
+    ->setDatabaseConfig('database');
 $confing = z::db()->getConfig();
-$migrationTable = z::arrayGet($confing, 'tablePrefix') . 'phinxlog';
+$migrationTable = z::arrayGet($confing, 'tablePrefix').'phinxlog';
 $master = $master = z::tap(z::db()->getMasters(), function ($master) {
     return end($master);
 });
@@ -23,11 +23,13 @@ $master = $master = z::tap(z::db()->getMasters(), function ($master) {
 //}
 $pdo = z::db()->pdoInstance();
 $database = [
-    'name'       => $confing['database'],
+    'name' => $confing['database'],
     'connection' => $pdo,
+    'table_prefix' => $confing['tablePrefix'],
+    'table_suffix' => '',
 ];
-$migrationPath = z::realPath($origin . 'migration.ini');
-$ini = is_file($migrationPath = $origin . 'migration.ini') ? @parse_ini_file($migrationPath, true) : [];
+$migrationPath = z::realPath($origin.'migration.ini');
+$ini = is_file($migrationPath = $origin.'migration.ini') ? @parse_ini_file($migrationPath, true) : [];
 $ini = z::arrayGet($ini, 'base');
 $versionOrder = z::arrayGet($ini, 'versionOrder', 'creation');
 $migrationTable = z::arrayGet($ini, 'migrationTable', 'migrations_log');
@@ -48,17 +50,17 @@ $seedPath = z::arrayMap((array)z::arrayGet($ini, 'seedPath', $seedPathDefault), 
 });
 
 return [
-    'paths'         => [
+    'paths' => [
         'migrations' => $migrationPath,
-        'seeds'      => $seedPath,
+        'seeds' => $seedPath,
     ],
-    'aliases'       => [
+    'aliases' => [
         'fields' => $fields,
     ],
-    'environments'  => [
-        'default_migration_table' => $confing['tablePrefix'] . $migrationTable,
-        'default_database'        => 'production',
-        'production'              => $database,
+    'environments' => [
+        'default_migration_table' => $confing['tablePrefix'].$migrationTable,
+        'default_database' => 'production',
+        'production' => $database,
     ],
     'version_order' => $versionOrder,
 ];

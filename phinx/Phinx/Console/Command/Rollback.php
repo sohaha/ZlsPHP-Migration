@@ -98,5 +98,4 @@ class Rollback extends AbstractCommand
             '    --sql'    => 'Show Sql',
         ];
     }
-
 }

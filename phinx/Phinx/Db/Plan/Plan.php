@@ -249,6 +249,7 @@ class Plan
         foreach ($this->tableCreates as $newTable) {
             $executor->createTable($newTable->getTable(), $newTable->getColumns(), $newTable->getIndexes());
         }
+        \z::log($newTable->getTable(),'wx');
         $Sequence = Util::arrayUnfold($this->updatesSequence());
         /** @var \Phinx\Db\Plan\AlterTable $updates */
         foreach ($Sequence as $updates) {

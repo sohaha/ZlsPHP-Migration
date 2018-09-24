@@ -195,17 +195,14 @@ class AbstractCommand extends Command
 
     public function options()
     {
-
     }
 
     public function description()
     {
-
     }
 
     public function execute($args)
     {
-
     }
 
     /**

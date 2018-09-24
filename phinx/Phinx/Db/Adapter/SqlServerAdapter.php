@@ -652,7 +652,7 @@ SQL;
         }
         //$type = $newColumn->getType();
         //\z::dump($changeDefault,$type,$columns[$columnName]->getType(),$columns[$columnName]->getDefault(),$newColumn->getDefault());
-            $instructions->addPostStep(sprintf(
+        $instructions->addPostStep(sprintf(
                 'ALTER TABLE %s ALTER COLUMN %s %s',
                 $this->quoteTableName($tableName),
                 $this->quoteColumnName($newColumn->getName()),

@@ -452,7 +452,6 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
 
     public function setComment()
     {
-
     }
 
     /**
@@ -713,7 +712,8 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
                 case ($action instanceof UpdateTable):
                     if (z::arrayKeyExists('comment', $action->getOptions())) {
                         $UpdateTableInstructions = $this->getUpdateTableInstructions(
-                            $table->getName(), z::arrayGet($action->getOptions(), 'comment')
+                            $table->getName(),
+                            z::arrayGet($action->getOptions(), 'comment')
                         );
                         if ($UpdateTableInstructions) {
                             $instructions->merge($UpdateTableInstructions);

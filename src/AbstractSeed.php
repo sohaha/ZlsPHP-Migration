@@ -15,5 +15,4 @@ use Phinx\Seed\AbstractSeed as PhinxAbstractSeed;
  */
 class AbstractSeed extends PhinxAbstractSeed
 {
-
 }

@@ -15,5 +15,4 @@ use Phinx\Db\Adapter\PostgresAdapter as PhinxPostgresAdapter;
  */
 class PostgresAdapter extends PhinxPostgresAdapter
 {
-
 }

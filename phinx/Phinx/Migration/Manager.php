@@ -100,7 +100,7 @@ class Manager
             $output->writeln('------------------------------------------------------------------------------------------');
             $env = $this->getEnvironment($environment);
             $versions = $env->getVersionLog();
-            $maxNameLength = $versions ? max(array_map(function ($version) use($FmigrationName){
+            $maxNameLength = $versions ? max(array_map(function ($version) use ($FmigrationName) {
                 return strlen($version[$FmigrationName]);
             }, $versions)) : 0;
             $missingVersions = array_diff_key($versions, $migrations);
@@ -555,8 +555,9 @@ class Manager
         $this->getOutput()->writeln(
             ' ==' .
             ' ' . $migration->getVersion() . ' ' . $this->getOutput()->colorText($migration->getName(), 'green') . ':' .
-            ' ' . ($direction === MigrationInterface::UP ? 'migrating' : 'reverting')
-            , 'white');
+            ' ' . ($direction === MigrationInterface::UP ? 'migrating' : 'reverting'),
+            'white'
+        );
         $migration->preFlightCheck($direction);
         // Execute the migration and log the time elapsed.
         $start = microtime(true);
@@ -566,8 +567,9 @@ class Manager
             ' ==' .
             ' ' . $migration->getVersion() . ' ' . $this->getOutput()->colorText($migration->getName(), 'green') . ':' .
             ' ' . ($direction === MigrationInterface::UP ? 'migrated' : 'reverted') .
-            ' ' . sprintf('%.4fs', $end - $start)
-            , 'light_gray');
+            ' ' . sprintf('%.4fs', $end - $start),
+            'light_gray'
+        );
     }
 
     /**
@@ -883,7 +885,6 @@ class Manager
      */
     public function toggleBreakpoint($environment, $version)
     {
-
         $migrations = $this->getMigrations($environment);
         $this->getMigrations($environment);
         $env = $this->getEnvironment($environment);

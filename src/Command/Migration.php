@@ -127,7 +127,10 @@ class Migration extends Command
     {
         $force = Z::arrayGet($args, ['-force', 'F', 'f']);
         $path = z::realPath(__DIR__.'/../migration.ini', false, false);
-        $this->copyFile($path, $this->vendorPath.'../migration.ini', $force,
+        $this->copyFile(
+            $path,
+            $this->vendorPath.'../migration.ini',
+            $force,
             function ($state) {
                 if (!$state) {
                     $this->error('migration.ini already exists');
@@ -135,7 +138,9 @@ class Migration extends Command
                 } else {
                     $this->success('Created Config file migration.ini');
                 }
-            }, '');
+            },
+            ''
+        );
     }
 
     private function clearArgs($args)
