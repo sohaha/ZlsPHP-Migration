@@ -21,6 +21,7 @@ use Phinx\Db\Plan\Plan;
 use Phinx\Db\Table\Column;
 use Phinx\Db\Table\Table as TableValue;
 use Phinx\Util\Util;
+use Z;
 
 /**
  * This object is based loosely on: http://api.rubyonrails.org/classes/ActiveRecord/ConnectionAdapters/Table.html.

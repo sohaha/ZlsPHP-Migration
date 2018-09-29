@@ -33,17 +33,9 @@ abstract class AbstractSeed implements SeedInterface
 
     /**
      * Class Constructor.
-     * @param \Symfony\Component\Console\Input\InputInterface   $input
-     * @param \Symfony\Component\Console\Output\OutputInterface $output
      */
-    final public function __construct(InputInterface $input = null, OutputInterface $output = null)
+    final public function __construct()
     {
-        if (!is_null($input)) {
-            $this->setInput($input);
-        }
-        if (!is_null($output)) {
-            $this->setOutput($output);
-        }
         $this->init();
     }
 

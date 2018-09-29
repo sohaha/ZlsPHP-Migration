@@ -32,6 +32,12 @@ class PhinxApplication
             case 'b':
                 $class = 'breakpoint';
                 break;
+            case 'seed:r':
+            case 's:r':
+            case 's:run':
+            case 'seed:run':
+                $class = 'seed_run';
+                break;
             case 'seed:c':
             case 's:c':
             case 's:create':
@@ -60,7 +66,6 @@ class PhinxApplication
             } else {
                 $err = str_replace('Cannot reverse a "Phinx\Db\Action\RemoveColumn" command', 'Please check the script content is qualified.', $err);
             }
-            
             $this->error($err);
         }
 
