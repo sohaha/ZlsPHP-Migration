@@ -98,6 +98,7 @@ abstract class AbstractAdapter implements AdapterInterface
                 'primary_key' => z::arrayGet($logFields, 'version'),
             ];
             $table = new Table($this->getSchemaTableName(), $options, $this);
+            $table->comment('表版本控制记录');
             $table->addColumn(z::arrayGet($logFields, 'version'), 'biginteger', ['comment' => '主键'])
                   ->addColumn(z::arrayGet($logFields, 'migration_name'), 'string', ['comment' => '迁移名称', 'limit' => 100, 'default' => null, 'null' => true])
                   ->addColumn(z::arrayGet($logFields, 'start_time'), 'datetime', ['comment' => '开始时间', 'default' => null, 'null' => true])

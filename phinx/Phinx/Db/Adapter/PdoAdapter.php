@@ -106,8 +106,8 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
     public function setConnection(\PDO $connection)
     {
         $logFields = $this->getLogFields();
-        $migrationName  = z::arrayGet($logFields, 'migration_name');
-        $breakpoint  = z::arrayGet($logFields, 'breakpoint');
+        $migrationName = z::arrayGet($logFields, 'migration_name');
+        $breakpoint = z::arrayGet($logFields, 'breakpoint');
         $this->connection = $connection;
         // Create the schema table if it doesn't already exist
         if (!$this->hasSchemaTable()) {
@@ -316,8 +316,9 @@ abstract class PdoAdapter extends AbstractAdapter implements DirectActionInterfa
      */
     protected function verboseLog($message)
     {
-        if (!$this->isDryRunEnabled() &&
-            $this->getOutput()->getVerbosity() < OutputInterface::VERBOSITY_VERY_VERBOSE) {
+        if (!$this->isDryRunEnabled()
+            && $this->getOutput()->getVerbosity() < OutputInterface::VERBOSITY_VERY_VERBOSE
+        ) {
             return;
         }
         $this->getOutput()->writeln($message);

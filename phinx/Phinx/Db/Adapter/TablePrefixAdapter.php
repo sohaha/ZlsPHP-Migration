@@ -351,9 +351,9 @@ class TablePrefixAdapter extends AdapterWrapper implements DirectActionInterface
                 case ($action instanceof RenameTable):
                     $actions[$k] = new RenameTable($adapterTable, $action->getNewName());
                     break;
-                //case ($action instanceof UpdateTable):
-                //    $actions[$k] = new UpdateTable($adapterTable,[]);
-                //    break;
+                case ($action instanceof UpdateTable):
+                    $actions[$k] = new UpdateTable($adapterTable, $action->getOptions());
+                    break;
                 default:
                     throw new \InvalidArgumentException(
                         sprintf("Forgot to implement table prefixing for action: '%s'", get_class($action))
