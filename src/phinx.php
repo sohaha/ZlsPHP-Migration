@@ -1,5 +1,5 @@
 <?php
-$origin = getcwd().'/';
+$origin = Z::realPath('.',true,false);
 z::config()
     ->addMasterPackage($origin.'application/')
     ->setAppDir($origin.'application/')
