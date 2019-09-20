@@ -109,7 +109,6 @@ class Config implements ConfigInterface, NamespaceAwareInterface
         //ob_start();
         /** @noinspection PhpIncludeInspection */
         $configArray = include($configFilePath);
-
         //ob_end_clean();
         return new static($configArray, $configFilePath);
     }
