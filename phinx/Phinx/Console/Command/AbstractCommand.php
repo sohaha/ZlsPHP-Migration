@@ -49,12 +49,12 @@ class AbstractCommand extends Command
     public function __construct()
     {
         parent::__construct();
-        $input = new InputInterface();
+        $input             = new InputInterface();
         self::$environment = $input->get(['-environment', 'e'], 'production');
-        self::$target = $input->get(['-target', 't']);
-        self::$date = $input->get(['-date', 'date']);
-        self::$fake = (bool)$input->get(['-fake']);
-        self::$force = (bool)$input->get(['-force','f','F']);
+        self::$target      = $input->get(['-target', 't']);
+        self::$date        = $input->get(['-date', 'date']);
+        self::$fake        = (bool)$input->get(['-fake']);
+        self::$force       = (bool)$input->get(['-force', 'f', 'F']);
         if (!self::$name = $input->get(['-name'])) {
             foreach ($input->get() as $k => $v) {
                 if (!is_numeric($k) || $k <= 2) {
@@ -64,15 +64,17 @@ class AbstractCommand extends Command
                 break;
             }
         }
-        $cwd = getcwd();
+        $cwd                 = Z::realPath('.', false, false);
         self::$configuration = $input->get(['-configuration'], $cwd . self::CONFIGURATION_PATH);
     }
 
 
     /**
      * Bootstrap Phinx.
-     * @param   InputInterface $input
-     * @param string           $output
+     *
+     * @param InputInterface $input
+     * @param string         $output
+     *
      * @return void
      */
     public function bootstrap(InputInterface $input, $output = '')
@@ -112,30 +114,36 @@ class AbstractCommand extends Command
 
     /**
      * Sets the config.
-     * @param  \Phinx\Config\ConfigInterface $config
+     *
+     * @param \Phinx\Config\ConfigInterface $config
+     *
      * @return \Phinx\Console\Command\AbstractCommand
      */
     public function setConfig(ConfigInterface $config)
     {
         $this->config = $config;
+
         return $this;
     }
 
     /**
      * Parse the config file and load it into the config object
+     *
      * @param InputInterface  $input
      * @param OutputInterface $output
+     *
      * @return void
      */
     protected function loadConfig(InputInterface $input, OutputInterface $output)
     {
         $configFilePath = z::realPath(self::$configuration);
-        $config = Config::fromPhp($configFilePath);
+        $config         = Config::fromPhp($configFilePath);
         $this->setConfig($config);
     }
 
     /**
      * Load the migrations manager and inject the config
+     *
      * @param InputInterface  $input
      * @param OutputInterface $output
      */
@@ -162,7 +170,9 @@ class AbstractCommand extends Command
 
     /**
      * Sets the migration manager.
+     *
      * @param \Phinx\Migration\Manager $manager
+     *
      * @return \Phinx\Console\Command\AbstractCommand
      */
     public function setManager(Manager $manager)
@@ -183,7 +193,9 @@ class AbstractCommand extends Command
 
     /**
      * Sets the database adapter.
+     *
      * @param \Phinx\Db\Adapter\AdapterInterface $adapter
+     *
      * @return \Phinx\Console\Command\AbstractCommand
      */
     public function setAdapter(AdapterInterface $adapter)
@@ -216,9 +228,11 @@ class AbstractCommand extends Command
 
     /**
      * Verify that the migration directory exists and is writable.
+     *
      * @param string $path
-     * @throws \InvalidArgumentException
+     *
      * @return void
+     * @throws \InvalidArgumentException
      */
     protected function verifyMigrationDirectory($path)
     {
@@ -238,9 +252,11 @@ class AbstractCommand extends Command
 
     /**
      * Verify that the seed directory exists and is writable.
+     *
      * @param string $path
-     * @throws \InvalidArgumentException
+     *
      * @return void
+     * @throws \InvalidArgumentException
      */
     protected function verifySeedDirectory($path)
     {
