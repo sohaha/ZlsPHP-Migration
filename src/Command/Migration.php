@@ -20,6 +20,7 @@ class Migration extends Command
 {
     private $vendorPath;
     private $configFilePath;
+    private $phinxPath;
 
     public function __construct()
     {
@@ -202,10 +203,10 @@ class Migration extends Command
             'seed:c',
             's:c',
         ];
-        if (!in_array($method, $ignoreConfiguration)) {
+        if (!in_array($method, $ignoreConfiguration, true)) {
             $argv .= ' --configuration '.$this->configFilePath;
         }
-        if (!in_array($method, $ignoreEnvironment)) {
+        if (!in_array($method, $ignoreEnvironment, true)) {
             $argv .= ' -e production';
         }
         $cmd = z::phpPath()." {$this->phinxPath} {$method} {$argv}";
