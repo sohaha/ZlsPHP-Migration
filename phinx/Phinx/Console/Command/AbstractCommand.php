@@ -49,12 +49,12 @@ class AbstractCommand extends Command
     public function __construct()
     {
         parent::__construct();
-        $input             = new InputInterface();
+        $input = new InputInterface();
         self::$environment = $input->get(['-environment', 'e'], 'production');
-        self::$target      = $input->get(['-target', 't']);
-        self::$date        = $input->get(['-date', 'date']);
-        self::$fake        = (bool)$input->get(['-fake']);
-        self::$force       = (bool)$input->get(['-force', 'f', 'F']);
+        self::$target = $input->get(['-target', 't']);
+        self::$date = $input->get(['-date', 'date']);
+        self::$fake = (bool)$input->get(['-fake']);
+        self::$force = (bool)$input->get(['-force', 'f', 'F']);
         if (!self::$name = $input->get(['-name'])) {
             foreach ($input->get() as $k => $v) {
                 if (!is_numeric($k) || $k <= 2) {
@@ -64,7 +64,7 @@ class AbstractCommand extends Command
                 break;
             }
         }
-        $cwd                 = Z::realPath('.', false, false);
+        $cwd = Z::realPathPhar('.', false);
         self::$configuration = $input->get(['-configuration'], $cwd . self::CONFIGURATION_PATH);
     }
 
@@ -73,7 +73,7 @@ class AbstractCommand extends Command
      * Bootstrap Phinx.
      *
      * @param InputInterface $input
-     * @param string         $output
+     * @param string $output
      *
      * @return void
      */
@@ -129,7 +129,7 @@ class AbstractCommand extends Command
     /**
      * Parse the config file and load it into the config object
      *
-     * @param InputInterface  $input
+     * @param InputInterface $input
      * @param OutputInterface $output
      *
      * @return void
@@ -137,14 +137,14 @@ class AbstractCommand extends Command
     protected function loadConfig(InputInterface $input, OutputInterface $output)
     {
         $configFilePath = z::realPath(self::$configuration);
-        $config         = Config::fromPhp($configFilePath);
+        $config = Config::fromPhp($configFilePath);
         $this->setConfig($config);
     }
 
     /**
      * Load the migrations manager and inject the config
      *
-     * @param InputInterface  $input
+     * @param InputInterface $input
      * @param OutputInterface $output
      */
     protected function loadManager(InputInterface $input, OutputInterface $output)

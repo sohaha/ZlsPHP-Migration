@@ -25,8 +25,9 @@ class Migration extends Command
     public function __construct()
     {
         parent::__construct();
-        $this->vendorPath = getcwd().'/vendor/';
-        $this->configFilePath = __DIR__.'/../phinx.php';
+        $this->vendorPath = Z::realPath('vendor', true, false);
+
+        $this->configFilePath = Z::realPath(__DIR__ . '/../phinx.php');
     }
 
 
@@ -127,10 +128,10 @@ class Migration extends Command
     public function init($args)
     {
         $force = Z::arrayGet($args, ['-force', 'F', 'f']);
-        $path = z::realPath(__DIR__.'/../migration.ini', false, false);
+        $path = z::realPath(__DIR__ . '/../migration.ini', false, false);
         $this->copyFile(
             $path,
-            $this->vendorPath.'../migration.ini',
+            $this->vendorPath . '../migration.ini',
             $force,
             function ($state) {
                 if (!$state) {
@@ -204,12 +205,12 @@ class Migration extends Command
             's:c',
         ];
         if (!in_array($method, $ignoreConfiguration, true)) {
-            $argv .= ' --configuration '.$this->configFilePath;
+            $argv .= ' --configuration ' . $this->configFilePath;
         }
         if (!in_array($method, $ignoreEnvironment, true)) {
             $argv .= ' -e production';
         }
-        $cmd = z::phpPath()." {$this->phinxPath} {$method} {$argv}";
+        $cmd = z::phpPath() . " {$this->phinxPath} {$method} {$argv}";
         if (z::arrayGet($args, '-debug')) {
             $this->printStrN($cmd);
         } else {

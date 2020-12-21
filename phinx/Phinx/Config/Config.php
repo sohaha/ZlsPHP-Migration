@@ -34,10 +34,10 @@ class Config implements ConfigInterface, NamespaceAwareInterface
     /**
      * {@inheritdoc}
      */
-    public function __construct(array $configArray, $configFilePath = null)
+    public function __construct($configArray, $configFilePath = null)
     {
         $this->configFilePath = $configFilePath;
-        $this->values = $this->replaceTokens($configArray);
+        $this->values = $this->replaceTokens($configArray ?: []);
     }
 
     /**
@@ -73,7 +73,7 @@ class Config implements ConfigInterface, NamespaceAwareInterface
 
     /**
      * Recurse an array for the specified tokens and replace them.
-     * @param array $arr    Array to recurse
+     * @param array $arr Array to recurse
      * @param array $tokens Array of tokens to search for
      * @return array
      */
@@ -100,9 +100,9 @@ class Config implements ConfigInterface, NamespaceAwareInterface
 
     /**
      * Create a new instance of the config class using a PHP file path.
-     * @param  string $configFilePath Path to the PHP File
-     * @throws \RuntimeException
+     * @param string $configFilePath Path to the PHP File
      * @return \Phinx\Config\Config
+     * @throws \RuntimeException
      */
     public static function fromPhp($configFilePath)
     {
@@ -199,7 +199,7 @@ class Config implements ConfigInterface, NamespaceAwareInterface
      */
     public function getAlias($alias)
     {
-        return z::arrayGet($this->values, 'aliases.'.$alias);
+        return z::arrayGet($this->values, 'aliases.' . $alias);
     }
 
     /**
