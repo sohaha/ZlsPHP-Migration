@@ -349,7 +349,7 @@ class TablePrefixAdapter extends AdapterWrapper implements DirectActionInterface
                     $actions[$k] = new RenameColumn($adapterTable, $action->getColumn(), $action->getNewName());
                     break;
                 case ($action instanceof RenameTable):
-                    $actions[$k] = new RenameTable($adapterTable, $action->getNewName());
+                    $actions[$k] = new RenameTable($adapterTable, $this->getAdapterTableName($action->getNewName()));
                     break;
                 case ($action instanceof UpdateTable):
                     $actions[$k] = new UpdateTable($adapterTable, $action->getOptions());
