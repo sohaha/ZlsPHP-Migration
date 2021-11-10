@@ -11,28 +11,54 @@ use Z;
 
 class Dynamic
 {
-    public static function run($table, array $data, $comment = '', $processing = null)
+    /** @var Custom */
+    private $migration;
+
+    public function __construct()
     {
         /** @var Migrate $obj */
-        $obj = Z::factory("\Phinx\Console\Command\Migrate", true);
+        $obj = Z::factory('\Phinx\Console\Command\Migrate', true);
         $outpu = new OutputInterface();
         $input = new Argv();
         $configFilePath = Z::realPath(Z::realPath('.', false, false) . AbstractCommand::CONFIGURATION_PATH);
         $config = Config::fromPhp($configFilePath);
         $obj->setConfig($config);
         $manager = new Manager($obj->getConfig(), $input, $outpu);
-        $environment = "production";
+        $environment = 'production';
         $migration = new Custom($environment, null, $input, $outpu);
-        if (empty($migration)) {
-            return "migration invalid";
-        }
+        Z::throwIf(empty($migration), 500, 'migration invalid');
         $env = $manager->getEnvironment($environment);
         $migration->setAdapter($env->getAdapter());
+        $this->migration = $migration;
+    }
+
+    /**
+     * @return Custom
+     */
+    public function getMigration()
+    {
+        return $this->migration;
+    }
+
+    public static function run($table, array $data, $comment = '', $processing = null)
+    {
+        $migration = (new self())->getMigration();
         try {
             $migration->up($table, $data, $comment, $processing);
             return null;
         } catch (\Exception $e) {
             return $e->getMessage();
         }
+    }
+
+    public static function migration($table)
+    {
+        return (new self())->getMigration()->table($table);
+    }
+
+    public static function exists($table)
+    {
+        $migration = (new self())->getMigration();
+        return $migration->table($table)->exists();
     }
 }

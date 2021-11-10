@@ -50,8 +50,8 @@ class Table
 
     /**
      * Class Constructor.
-     * @param string                             $name    Table Name
-     * @param array                              $options Options
+     * @param string $name Table Name
+     * @param array $options Options
      * @param \Phinx\Db\Adapter\AdapterInterface $adapter Database Adapter
      */
     public function __construct($name, $options = [], AdapterInterface $adapter = null)
@@ -183,9 +183,9 @@ class Table
 
     /**
      * Change a table column type.
-     * @param string                                            $columnName    Column Name
+     * @param string $columnName Column Name
      * @param string|\Phinx\Db\Table\Column|\Phinx\Util\Literal $newColumnType New Column Type
-     * @param array                                             $options       Options
+     * @param array $options Options
      * @return \Phinx\Db\Table
      */
     public function changeColumn($columnName, $newColumnType, array $options = [])
@@ -214,7 +214,7 @@ class Table
      * Add an index to a database table.
      * In $options you can specific unique = true/false or name (index name).
      * @param string|array|\Phinx\Db\Table\Index $columns Table Column(s)
-     * @param array                              $options Index Options
+     * @param array $options Index Options
      * @return \Phinx\Db\Table
      */
     public function addIndex($columns, array $options = [])
@@ -275,10 +275,10 @@ class Table
      * Add a foreign key to a database table.
      * In $options you can specify on_delete|on_delete = cascade|no_action ..,
      * on_update, constraint = constraint name.
-     * @param string|array           $columns           Columns
-     * @param string|\Phinx\Db\Table $referencedTable   Referenced Table
-     * @param string|array           $referencedColumns Referenced Columns
-     * @param array                  $options           Options
+     * @param string|array $columns Columns
+     * @param string|\Phinx\Db\Table $referencedTable Referenced Table
+     * @param string|array $referencedColumns Referenced Columns
+     * @param array $options Options
      * @return \Phinx\Db\Table
      */
     public function addForeignKey($columns, $referencedTable, $referencedColumns = ['id'], $options = [])
@@ -293,11 +293,11 @@ class Table
      * Add a foreign key to a database table with a given name.
      * In $options you can specify on_delete|on_delete = cascade|no_action ..,
      * on_update, constraint = constraint name.
-     * @param string                 $name              The constraint name
-     * @param string|array           $columns           Columns
-     * @param string|\Phinx\Db\Table $referencedTable   Referenced Table
-     * @param string|array           $referencedColumns Referenced Columns
-     * @param array                  $options           Options
+     * @param string $name The constraint name
+     * @param string|array $columns Columns
+     * @param string|\Phinx\Db\Table $referencedTable Referenced Table
+     * @param string|array $referencedColumns Referenced Columns
+     * @param array $options Options
      * @return \Phinx\Db\Table
      */
     public function addForeignKeyWithName($name, $columns, $referencedTable, $referencedColumns = ['id'], $options = [])
@@ -317,8 +317,8 @@ class Table
 
     /**
      * Removes the given foreign key from the table.
-     * @param string|array $columns    Column(s)
-     * @param null|string  $constraint Constraint names
+     * @param string|array $columns Column(s)
+     * @param null|string $constraint Constraint names
      * @return \Phinx\Db\Table
      */
     public function dropForeignKey($columns, $constraint = null)
@@ -331,8 +331,8 @@ class Table
 
     /**
      * Checks to see if a foreign key exists.
-     * @param  string|array $columns    Column(s)
-     * @param  null|string  $constraint Constraint names
+     * @param string|array $columns Column(s)
+     * @param null|string $constraint Constraint names
      * @return bool
      */
     public function hasForeignKey($columns, $constraint = null)
@@ -342,10 +342,10 @@ class Table
 
     /**
      * Alias that always sets $withTimezone to true
-     * @see addTimestamps
      * @param string|null $createdAt Alternate name for the created_at column
      * @param string|null $updatedAt Alternate name for the updated_at column
      * @return \Phinx\Db\Table
+     * @see addTimestamps
      */
     public function addTimestampsWithTimezone($createdAt = null, $updatedAt = null)
     {
@@ -356,9 +356,9 @@ class Table
 
     /**
      * Add timestamp columns created_at and updated_at to the table.
-     * @param string|null $createdAt    Alternate name for the created_at column
-     * @param string|null $updatedAt    Alternate name for the updated_at column
-     * @param bool        $withTimezone Whether to set the timezone option on the added columns
+     * @param string|null $createdAt Alternate name for the created_at column
+     * @param string|null $updatedAt Alternate name for the updated_at column
+     * @param bool $withTimezone Whether to set the timezone option on the added columns
      * @return \Phinx\Db\Table
      */
     public function addTimestamps($createdAt = 'created_at', $updatedAt = 'updated_at', $withTimezone = false)
@@ -366,15 +366,16 @@ class Table
         $createdAt = is_null($createdAt) ? 'created_at' : $createdAt;
         $updatedAt = is_null($updatedAt) ? 'updated_at' : $updatedAt;
         $this->addColumn($createdAt, 'timestamp', [
-            'default'  => 'CURRENT_TIMESTAMP',
-            'update'   => '',
+            'default' => 'CURRENT_TIMESTAMP',
+            'update' => '',
             'timezone' => $withTimezone,
         ])
-             ->addColumn($updatedAt, 'timestamp', [
-                 'null'     => true,
-                 'default'  => null,
-                 'timezone' => $withTimezone,
-             ]);
+            ->addColumn($updatedAt, 'timestamp', [
+                'null' => true,
+                'default' => null,
+                'update' => 'CURRENT_TIMESTAMP',
+                'timezone' => $withTimezone,
+            ]);
 
         return $this;
     }
@@ -385,11 +386,11 @@ class Table
      * time, date, binary, boolean.
      * Valid options can be: limit, default, null, precision or scale.
      * @param string|\Phinx\Db\Table\Column $columnName Column Name
-     * @param string|\Phinx\Util\Literal    $type       Column Type
-     * @param array                         $options    Column Options
-     * @throws \RuntimeException
-     * @throws \InvalidArgumentException
+     * @param string|\Phinx\Util\Literal $type Column Type
+     * @param array $options Column Options
      * @return \Phinx\Db\Table
+     * @throws \InvalidArgumentException
+     * @throws \RuntimeException
      */
     public function addColumn($columnName, $type = null, $options = [])
     {
@@ -470,8 +471,8 @@ class Table
 
     /**
      * Updates a table from the object instance.
-     * @throws \RuntimeException
      * @return void
+     * @throws \RuntimeException
      */
     public function update()
     {

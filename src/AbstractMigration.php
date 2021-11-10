@@ -58,4 +58,22 @@ class AbstractMigration extends PhinxAbstractMigration
     const OPTIONS_TIMESTAMP_DEFAULT = 'default';
     const OPTIONS_TIMESTAMP_TIMEZONE = 'timezone';
     const OPTIONS_TIMESTAMP_UPDATE = 'update';
+
+    const MYSQL_TEXT_TINY = 255;
+    const MYSQL_TEXT_SMALL = 255;
+    const MYSQL_TEXT_MEDIUM = 16777215;
+    const MYSQL_TEXT_LONG = 4294967295;
+    const MYSQL_BLOB_TINY = 255;
+    const MYSQL_BLOB_SMALL = 255;
+    const MYSQL_BLOB_MEDIUM = 16777215;
+    const MYSQL_BLOB_LONG = 4294967295;
+    const MYSQL_INT_TINY = 255;
+    const MYSQL_INT_SMALL = 65535;
+    const MYSQL_INT_MEDIUM = 16777215;
+    const MYSQL_INT_REGULAR = 4294967295;
+    const MYSQL_INT_BIG = 18446744073709551615;
+    const MYSQL_BIT = 64;
+    const MYSQL_TYPE_YEAR = 'year';
+
+    const POSTGRE_SQL_INT_SMALL = 65535;
 }

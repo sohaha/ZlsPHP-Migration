@@ -25,7 +25,7 @@ class Custom extends M
             $processing($obj);
             return;
         }
-            
+
         $obj->save();
     }
 }
