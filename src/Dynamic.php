@@ -40,9 +40,18 @@ class Dynamic
         return $this->migration;
     }
 
+    public static function instance()
+    {
+        static $instance;
+        if (!$instance) {
+            $instance = new self();
+        }
+        return $instance;
+    }
+
     public static function run($table, array $data, $comment = '', $processing = null)
     {
-        $migration = (new self())->getMigration();
+        $migration = self::instance()->getMigration();
         try {
             $migration->up($table, $data, $comment, $processing);
             return null;
@@ -53,12 +62,12 @@ class Dynamic
 
     public static function migration($table)
     {
-        return (new self())->getMigration()->table($table);
+        return self::instance()->getMigration()->table($table);
     }
 
     public static function exists($table)
     {
-        $migration = (new self())->getMigration();
+        $migration = self::instance()->getMigration();
         return $migration->table($table)->exists();
     }
 }

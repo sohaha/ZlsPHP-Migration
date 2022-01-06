@@ -17,7 +17,6 @@ use Phinx\Db\Plan\Intent;
 use Phinx\Db\Plan\Plan;
 use Phinx\Db\Table\Table;
 use Phinx\Migration\IrreversibleMigrationException;
-use Z;
 
 /**
  * Phinx Proxy Adapter.

@@ -21,7 +21,6 @@ use Phinx\Db\Plan\Plan;
 use Phinx\Db\Table\Column;
 use Phinx\Db\Table\Table as TableValue;
 use Phinx\Util\Util;
-use Z;
 
 /**
  * This object is based loosely on: http://api.rubyonrails.org/classes/ActiveRecord/ConnectionAdapters/Table.html.
@@ -365,6 +364,7 @@ class Table
     {
         $createdAt = is_null($createdAt) ? 'created_at' : $createdAt;
         $updatedAt = is_null($updatedAt) ? 'updated_at' : $updatedAt;
+        $adapter = $this->getAdapter()->getOption('adapter');
         $this->addColumn($createdAt, 'timestamp', [
             'default' => 'CURRENT_TIMESTAMP',
             'update' => '',
@@ -373,7 +373,7 @@ class Table
             ->addColumn($updatedAt, 'timestamp', [
                 'null' => true,
                 'default' => null,
-                'update' => 'CURRENT_TIMESTAMP',
+                'update' => in_array($adapter, ['sqlite']) ? '' : 'CURRENT_TIMESTAMP',
                 'timezone' => $withTimezone,
             ]);
 

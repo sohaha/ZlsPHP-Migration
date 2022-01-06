@@ -8,7 +8,6 @@ use Phinx\Db\Table\Index;
 use Phinx\Db\Table\Table;
 use Phinx\Db\Util\AlterInstructions;
 use Phinx\Util\Literal;
-use Z;
 
 class PostgresAdapter extends PdoAdapter implements AdapterInterface
 {
